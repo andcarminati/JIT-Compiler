@@ -46,8 +46,11 @@ llvm::Value* BinaryExprAST::acceptIRGenVisitor(IRGen* visitor){
     return visitor->visit(this);
 }
 
+llvm::Value* UnaryExprAST::acceptIRGenVisitor(IRGen* visitor){
+    return visitor->visit(this);
+}
+
 llvm::Value* CallExprAST::acceptIRGenVisitor(IRGen* visitor){
-    
     return visitor->visit(this);
 }
 

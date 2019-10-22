@@ -42,6 +42,7 @@ class DoubleNumberExprAST;
 class BinaryExprAST;
 class ReturnAST;
 class CallExprAST;
+class UnaryExprAST;
 
 using namespace llvm;
 
@@ -57,6 +58,7 @@ public:
     llvm::Value* visit(VariableExprAST* node);
     llvm::Value* visit(DoubleNumberExprAST* node);
     llvm::Value* visit(BinaryExprAST* node);
+    llvm::Value* visit(UnaryExprAST* node);
     llvm::Value* visit(CallExprAST* node);
     std::unique_ptr<Module> getModule();
     

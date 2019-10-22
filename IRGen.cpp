@@ -338,6 +338,13 @@ Value* IRGen::visit(BinaryExprAST* node) {
     return nullptr;
 }
 
+Value* IRGen::visit(UnaryExprAST* node){
+    
+    abort("Code generator: ", "unimplemented unary operation");
+    return nullptr;
+}
+
+
 // ReturnAST overload
 void IRGen::visit(ReturnAST* ifexp) {
 

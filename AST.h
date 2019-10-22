@@ -138,6 +138,29 @@ public:
     }
 };
 
+/// UnaryExprAST - Expression class for a binary operator.
+
+class UnaryExprAST : public ExprAST {
+    Operation Op;
+    std::unique_ptr<ExprAST> RHS;
+
+public:
+
+    UnaryExprAST(Operation op, std::unique_ptr<ExprAST> RHS)
+    : Op(op), RHS(std::move(RHS)) {
+    }
+    virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
+
+    Operation getOp() {
+        return Op;
+    }
+
+    std::unique_ptr<ExprAST> getRHS() {
+        return std::move(RHS);
+    }
+};
+
+
 /// AssignmentAST - Class for assignment nodes. (deprecated - must remove)
 
 class AssignmentAST : public ExprAST {
