@@ -1,0 +1,11 @@
+function funcao3(a, b, c, d, e, f) {
+
+    if(a < b){
+        a = c;
+        b = d;
+    } else {
+        a = e;
+        b = f;
+    }
+   return a+b;
+}

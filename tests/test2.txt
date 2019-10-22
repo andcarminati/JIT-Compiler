@@ -1,0 +1,14 @@
+
+function maior(a, b){
+    if(a < b){
+        a = b;
+    }
+    return a;
+}
+
+
+function main() {
+
+
+    return maior(7, 50);
+}

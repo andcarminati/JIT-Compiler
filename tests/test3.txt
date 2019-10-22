@@ -1,0 +1,15 @@
+
+function maior(a, b){
+    a = a+b;
+    if(a < b){
+        return b+1;
+    }
+    return a+1;
+}
+
+
+function main() {
+
+
+    return maior(60+2, 50+2);
+}

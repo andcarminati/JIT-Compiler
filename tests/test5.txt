@@ -1,0 +1,22 @@
+
+extern printd(double); 
+extern sin(double); 
+
+function fat(n){
+
+    if(n == 0){
+        return 1;
+    }
+    return n*fat(n-1);
+}
+
+function test(n){
+
+    return sin(n);
+}
+
+function main() {
+
+    printd(fat(5));
+    return test(40);
+}

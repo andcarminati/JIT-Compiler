@@ -1,0 +1,24 @@
+     
+function funcao(a, b, c) {
+    a;
+    b = a + 2;
+    a = c;
+}
+
+#function funcao2(a, b) {
+
+#    b = 1;
+#}
+
+#function funcao3(a, b) {
+
+#    if(a < b){
+#        a;
+#    } else {
+#        b; 
+#        if(b){
+#            b;
+#        }
+#    }
+    #return a;
+#}

@@ -1,0 +1,6 @@
+Language Interpreter
+Copyright 2019 Andreu Carminati.
+
+
+This software contains code derived from the Kaleidoscope LLVM Toturial, including various
+modifications.
