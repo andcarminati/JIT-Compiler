@@ -49,15 +49,18 @@ IRGen::IRGen(llvm::LLVMContext* TheContext) {
 }
 
 // Entry point of the IR Generator. Using a visitor design pattern.
+
 void IRGen::GenFromAST(std::unique_ptr<PrimaryAST> node) {
     node->acceptIRGenVisitor(this);
 }
 
 // Prorotype overload.
+
 void IRGen::visit(PrototypeAST* proto) {
     auto *TheFunction = visitFunctionPrototypeImpl(proto);
 }
 // FunctionAST overload.
+
 void IRGen::visit(FunctionAST* node) {
     // calls the real implementation
     auto *TheFunction = visitFunctionImpl(node);
@@ -67,6 +70,7 @@ void IRGen::visit(FunctionAST* node) {
 }
 
 // Internal method for prototype function generation
+
 Function* IRGen::visitFunctionPrototypeImpl(PrototypeAST* node) {
     std::vector<std::string>& Args = node->getArgs();
     const std::string& Name = node->getName();
@@ -87,6 +91,7 @@ Function* IRGen::visitFunctionPrototypeImpl(PrototypeAST* node) {
 }
 
 // Private method for the real job. 
+
 Function* IRGen::visitFunctionImpl(FunctionAST* node) {
     // First, check for an existing function from a previous 'extern' declaration.
     const std::string& Name = node->getName();
@@ -117,6 +122,7 @@ Function* IRGen::visitFunctionImpl(FunctionAST* node) {
 
 // Generate allocas for every function parameter plus the return value. We can optimize
 // these allcoas with men2reg pass.
+
 void IRGen::allocSpaceForParams(Function* function, BasicBlock* BB) {
 
     std::list<AllocaInst*> allocas;
@@ -150,6 +156,7 @@ void IRGen::allocSpaceForParams(Function* function, BasicBlock* BB) {
 }
 
 // Private method for expression block code generation.
+
 BasicBlock* IRGen::visitExpBlock(std::unique_ptr<ExprBlockAST> block,
         std::string name, Function* function) {
 
@@ -249,6 +256,7 @@ void IRGen::visit(IfExprAST* ifexp) {
 }
 
 // VariableExprAST overload
+
 llvm::Value* IRGen::visit(VariableExprAST* node) {
 
     if (!symbolTable.contains(node->getName())) {
@@ -268,11 +276,13 @@ llvm::Value* IRGen::visit(VariableExprAST* node) {
 }
 
 // DoubleNumberExprAST overload.
+
 Value* IRGen::visit(DoubleNumberExprAST* node) {
     return ConstantFP::get(*TheContext, APFloat(node->getVal()));
 }
 
 // BinaryExprAST overload.
+
 Value* IRGen::visit(BinaryExprAST* node) {
 
     Operation Op = node->getOp();
@@ -324,7 +334,7 @@ Value* IRGen::visit(BinaryExprAST* node) {
         case Operation::EQ:
             L = Builder->CreateFCmpUEQ(L, R, "eqtmp");
             // Convert bool 0/1 to double 0.0 or 1.0
-            return Builder->CreateUIToFP(L, Type::getDoubleTy(*TheContext), "booltmp"); 
+            return Builder->CreateUIToFP(L, Type::getDoubleTy(*TheContext), "booltmp");
         case Operation::LT:
             L = Builder->CreateFCmpULT(L, R, "cmptmp");
             // Convert bool 0/1 to double 0.0 or 1.0
@@ -338,14 +348,52 @@ Value* IRGen::visit(BinaryExprAST* node) {
     return nullptr;
 }
 
-Value* IRGen::visit(UnaryExprAST* node){
-    
-    abort("Code generator: ", "unimplemented unary operation");
-    return nullptr;
+Value* IRGen::visit(UnaryExprAST* node) {
+
+    std::unique_ptr<ExprAST> LRHS = node->getLRHS();
+    Operation op = node->getOp();
+    bool isPrefixed = node->isPrefix();
+    Value* result;
+
+    VariableExprAST *LHSE = static_cast<VariableExprAST *> (LRHS.get());
+    if (!LHSE) {
+        std::cout << "unary operand must be a variable\n";
+        // return LogErrorV("destination of '=' must be a variable");
+        return nullptr;
+    }
+
+    Value* var = LHSE->acceptIRGenVisitor(this);
+    Symbol* sym = symbolTable.getSymbol(LHSE->getName());
+    if (!sym) {
+        abort("Unknown symbol: ", LHSE->getName());
+        return nullptr;
+    }
+
+    switch (op) {
+        case Operation::INC:
+            result = Builder->CreateFAdd(var, ConstantFP::get(*TheContext,
+                    APFloat(1.0)), "inctmp");
+            break;
+        case Operation::DEC:
+            result = Builder->CreateFSub(var, ConstantFP::get(*TheContext,
+                    APFloat(1.0)), "dectmp");
+            break;
+        default:
+            abort("Unimplemented unary operator", "");
+            return nullptr;
+    }
+    Builder->CreateStore(result, sym->getMemRef());
+
+    if (!isPrefixed) {
+        result = var;
+    }
+
+    return result;
 }
 
 
 // ReturnAST overload
+
 void IRGen::visit(ReturnAST* ifexp) {
 
     // this methos only saves the Value of the expression in the 
@@ -362,6 +410,7 @@ void IRGen::visit(ReturnAST* ifexp) {
 }
 
 // CallExprAST overload
+
 llvm::Value* IRGen::visit(CallExprAST* node) {
     // Look up the name in the global module table.
     Function *CalleeF = TheModule->getFunction(node->getCalee());
@@ -386,6 +435,7 @@ llvm::Value* IRGen::visit(CallExprAST* node) {
 }
 
 // Transfer the pointer out of this object.
+
 std::unique_ptr<Module> IRGen::getModule() {
     return std::move(TheModule);
 }

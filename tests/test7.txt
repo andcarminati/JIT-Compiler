@@ -3,7 +3,7 @@ extern printd(double);
 
 function inc(a, n){
 
-    a = n++;
+    a = --n;
     return a;
 }
 

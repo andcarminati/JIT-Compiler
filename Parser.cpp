@@ -240,6 +240,7 @@ std::unique_ptr<ExprAST> Parser::ParseExpression() {
     if (!LHS) {
         return nullptr;
     }
+    
     std::unique_ptr<ExprAST> exp = ParseBinOpRHS(0, std::move(LHS));
 
     return exp;
@@ -272,9 +273,28 @@ std::unique_ptr<ExprAST> Parser::ParsePrimary() {
         case tok_if:
             exp = ParseIfExpr();
             break;
+        case tok_operator:
+            exp = ParseUnaryExpr();
+            break;    
             //exp = 
     }
     return exp;
+}
+
+std::unique_ptr<ExprAST> Parser::ParseUnaryExpr(){
+    Operation op = lexer->getOperation();
+    std::unique_ptr<ExprAST> exp;
+    
+    if(lexer->getOpType() != OperationType::UNARY){
+                    fail();
+            return LogError<ExprAST>("Invalid unary operator",
+                    lexer->GetTokLine());
+    }
+    lexer->getNextToken(); //eat unary op;
+    exp = ParseIdentifierExpr();
+   
+    
+    return std::make_unique<UnaryExprAST>(op, std::move(exp), true);
 }
 
 
@@ -286,10 +306,17 @@ std::unique_ptr<ExprAST> Parser::ParseIdentifierExpr() {
     std::string IdName = lexer->getIdentifierStr();
     std::unique_ptr<ExprAST> exp;
     lexer->getNextToken(); // eat identifier.
-
     if (lexer->getCurrentToken() != '(') { // Simple variable ref.
-        exp = std::make_unique<VariableExprAST>(IdName);
-
+        auto expTemp = std::make_unique<VariableExprAST>(IdName);
+        // we can have an unary expression i.e. ++, --.
+        if(lexer->getCurrentToken() == Token::tok_operator && 
+                lexer->getOpType() == OperationType::UNARY){
+            exp = std::make_unique<UnaryExprAST>(lexer->getOperation(), std::move(expTemp), false);
+            lexer->getNextToken();// eat operator
+        } else {
+            // or a simple variable expression
+            exp = std::move(expTemp);
+        }
         // Call.
     } else if (lexer->getCurrentToken() == '(') {
         lexer->getNextToken(); // eat (

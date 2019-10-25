@@ -142,12 +142,13 @@ public:
 
 class UnaryExprAST : public ExprAST {
     Operation Op;
-    std::unique_ptr<ExprAST> RHS;
+    bool prefix;
+    std::unique_ptr<ExprAST> LRHS;
 
 public:
 
-    UnaryExprAST(Operation op, std::unique_ptr<ExprAST> RHS)
-    : Op(op), RHS(std::move(RHS)) {
+    UnaryExprAST(Operation op, std::unique_ptr<ExprAST> LRHS, bool prefix)
+    : Op(op), LRHS(std::move(LRHS)), prefix(prefix) {
     }
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
 
@@ -155,8 +156,12 @@ public:
         return Op;
     }
 
-    std::unique_ptr<ExprAST> getRHS() {
-        return std::move(RHS);
+    std::unique_ptr<ExprAST> getLRHS() {
+        return std::move(LRHS);
+    }
+    
+    bool isPrefix(){
+        return prefix;
     }
 };
 

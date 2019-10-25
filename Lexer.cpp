@@ -135,7 +135,13 @@ int Lexer::getTok() {// gettok - Return the next token from standard input.
         }
         case '-':
         {
-            CurrOperation = Operation::SUB;
+            if (LastChar == '-') {
+                LastChar = file->get();
+                CurrOperation = Operation::DEC;
+                CurrOpType = OperationType::UNARY;
+            } else {
+                CurrOperation = Operation::SUB;
+            }
             break;
         }
         case '*':
