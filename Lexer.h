@@ -63,6 +63,7 @@ public:
     int getNextToken();
     std::string getIdentifierStr();
     Operation getOperation();
+    OperationType getOpType();
     double getNumVal();
     int GetTokPrecedence();
     int GetTokLine();
@@ -76,6 +77,7 @@ private:
     std::string IdentifierStr; // Filled in if tok_identifier
     double NumVal; // Filled in if tok_number
     Operation CurrOperation;
+    OperationType CurrOpType;
     int getTok();
 
 };

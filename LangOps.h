@@ -34,12 +34,18 @@ enum Operation {
     
     //Aritmetic operators
     ADD,
+    INC,
+    DEC,
     SUB,
     MUL,
     DIV
     
 };
 
+enum OperationType{
+    BINARY = 0,
+    UNARY
+};
 
 
 #endif	/* LANGOPS_H */

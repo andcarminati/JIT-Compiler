@@ -1,0 +1,15 @@
+
+extern printd(double); 
+
+function inc(n){
+
+    n++;
+    return n;
+}
+
+
+function main() {
+
+    printd(inc(5));
+    return 5;
+}

@@ -27,6 +27,7 @@ public:
     //virtual ~Parser() {};
     
     std::unique_ptr<PrimaryAST> nextConstruct();
+    bool hasFail();
 private:
     std::unique_ptr<Lexer> lexer;
     
@@ -42,6 +43,8 @@ private:
     std::unique_ptr<ExprAST> ParseReturnExpr();
     std::unique_ptr<ExprBlockAST> ParseExprBlock();
     std::unique_ptr<ExprAST> ParseIfExpr();
+    bool failed = false;
+    void fail();
     
 };
 

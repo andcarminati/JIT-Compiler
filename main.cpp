@@ -37,7 +37,15 @@ static void Driver(std::shared_ptr<Parser> parser){
     
     auto generator = std::make_unique<IRGen>(IRGen(&TheContext));
     
-    while(auto exp = parser->nextConstruct()){
+    while(true){
+        auto exp = parser->nextConstruct();
+        if(parser->hasFail()){
+            std::cout << "Aborting compilation" << std::endl;
+            return;
+        }
+        if(!exp){
+            break;
+        }
         generator->GenFromAST(std::move(exp));
     }
     
@@ -51,15 +59,23 @@ static void Driver(std::shared_ptr<Parser> parser){
 /*
  * 
  */
+// avoid reexecution of main.
+static bool again = false;
+
 int main(int argc, char** argv) {
 
+    if(again){
+        return -1;
+    } else{
+        again = true;
+    } 
     
     //auto file = std::make_unique<std::ifstream>(std::ifstream("tests/testif.txt"));
-    auto file = std::make_unique<std::ifstream>(std::ifstream("tests/test5.txt"));
+    auto file = std::make_unique<std::ifstream>(std::ifstream("tests/test6.txt"));
     
     if(!file->good()){
-        std::cout << "Cannot open the specified file" << std::endl;
-        return -1;
+        std::cout << "Cannot open the specified file!" << std::endl;
+        exit(-1);
     }
     auto lexer = std::make_unique<Lexer>(Lexer(std::move(file)));
     auto parser = std::make_shared<Parser>(Parser(std::move(lexer)));

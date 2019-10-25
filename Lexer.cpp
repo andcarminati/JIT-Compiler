@@ -105,6 +105,7 @@ int Lexer::getTok() {// gettok - Return the next token from standard input.
     int ThisChar = LastChar;
     LastChar = file->get();
     CurrOperation = Operation::UNKNOWN;
+    CurrOpType = OperationType::BINARY;
     switch (ThisChar) {
         case '=':
         {
@@ -123,7 +124,13 @@ int Lexer::getTok() {// gettok - Return the next token from standard input.
         }
         case '+':
         {
-            CurrOperation = Operation::ADD;
+            if (LastChar == '+') {
+                LastChar = file->get();
+                CurrOperation = Operation::INC;
+                CurrOpType = OperationType::UNARY;
+            } else {
+                CurrOperation = Operation::ADD;
+            }
             break;
         }
         case '-':
@@ -158,6 +165,10 @@ double Lexer::getNumVal() {
 
 Operation Lexer::getOperation() {
     return CurrOperation;
+}
+
+OperationType Lexer::getOpType() {
+    return CurrOpType;
 }
 
 /// GetTokPrecedence - Get the precedence of the pending binary operator token.

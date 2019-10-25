@@ -77,7 +77,6 @@ private:
     
     void allocSpaceForParams(Function* function, BasicBlock* BB);
     
-    
 };
 
 #endif	/* IRGEN_H */

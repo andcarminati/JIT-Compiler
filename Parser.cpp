@@ -56,6 +56,14 @@ std::unique_ptr<ExprBlockAST> LogErrorB(const char *Str, int line) {
     return nullptr;
 }
  */
+void Parser::fail(){
+    failed = true;
+}
+
+bool Parser::hasFail(){
+    return failed;
+}
+
 std::unique_ptr<PrimaryAST> Parser::nextConstruct() {
     //while (lexer->getCurrentToken() == ';') {
     //lexer->getNextToken();
@@ -140,6 +148,7 @@ std::unique_ptr<ExprBlockAST> Parser::ParseExprBlock() {
     std::unique_ptr<ExprBlockAST> block = std::make_unique<ExprBlockAST>(ExprBlockAST());
 
     if (lexer->getCurrentToken() != '{') {
+        fail();
         return LogError<ExprBlockAST>("Expected { in function body start",
                 lexer->GetTokLine());
 
@@ -153,6 +162,7 @@ std::unique_ptr<ExprBlockAST> Parser::ParseExprBlock() {
         }
         if (E->isSimple()) {
             if (lexer->getCurrentToken() != ';') {
+                fail();
                 return LogError<ExprBlockAST>("Expected ; in expression",
                         lexer->GetTokLine());
             }
@@ -170,6 +180,7 @@ std::unique_ptr<ExprBlockAST> Parser::ParseExprBlock() {
         }
     }
     if (lexer->getCurrentToken() != '}') {
+        fail();
         return LogError<ExprBlockAST>("Expected } in function body termination",
                 lexer->GetTokLine());
     }
@@ -187,6 +198,7 @@ std::unique_ptr<FunctionAST> Parser::ParseDefinition() {
     if (!Proto) return nullptr;
 
     if (lexer->getCurrentToken() != '{') {
+        fail();
         return LogError<FunctionAST>("Expected { in function body start",
                 lexer->GetTokLine());
     }
@@ -203,7 +215,14 @@ std::unique_ptr<FunctionAST> Parser::ParseDefinition() {
     //     return std::make_unique<FunctionAST>(std::move(Proto), std::move(E));
     // }
     std::unique_ptr<ExprBlockAST> block = ParseExprBlock();
+    
+    if(!block){
+        fail();
+        return LogError<FunctionAST>("Problem in function parsing", lexer->GetTokLine());
+    }
+    
     if (block->empty()) {
+        fail();
         return LogError<FunctionAST>("An empty function body is not allowed",
                 lexer->GetTokLine());
     }
@@ -235,6 +254,7 @@ std::unique_ptr<ExprAST> Parser::ParsePrimary() {
     std::unique_ptr<ExprAST> exp;
     switch (lexer->getCurrentToken()) {
         default:
+            fail();
             return LogError<ExprAST>("unknown token when expecting an expression",
                     lexer->GetTokLine());
         case tok_identifier:
@@ -284,9 +304,11 @@ std::unique_ptr<ExprAST> Parser::ParseIdentifierExpr() {
                 if (lexer->getCurrentToken() == ')')
                     break;
 
-                if (lexer->getCurrentToken() != ',')
+                if (lexer->getCurrentToken() != ','){
+                    fail();
                     return LogError<ExprAST>("Expected ')' or ',' in argument list",
                         lexer->GetTokLine());
+                }    
                 lexer->getNextToken();
             }
         }
@@ -352,8 +374,10 @@ std::unique_ptr<ExprAST> Parser::ParseParenExpr() {
     if (!V) {
         return nullptr;
     }
-    if (lexer->getCurrentToken() != ')')
+    if (lexer->getCurrentToken() != ')'){
+        fail();
         return LogError<ExprAST>("expected ')'", lexer->GetTokLine());
+    }    
     lexer->getNextToken(); // eat ).
     return V;
 }
@@ -373,6 +397,7 @@ std::unique_ptr<ExprAST> Parser::ParseReturnExpr() {
 std::unique_ptr<ExprAST> Parser::ParseIfExpr() {
     lexer->getNextToken(); // eat the if.
     if (lexer->getCurrentToken() != '(') {
+        fail();
         return LogError<ExprAST>("expected ( in if condition", lexer->GetTokLine());
     }
     lexer->getNextToken();
@@ -383,7 +408,7 @@ std::unique_ptr<ExprAST> Parser::ParseIfExpr() {
         return nullptr;
 
     if (lexer->getCurrentToken() != ')') {
-        printf("%d\n", lexer->getCurrentToken());
+        fail();
         return LogError<ExprAST>("expected ) in the end of if condition", lexer->GetTokLine());
     }
     lexer->getNextToken();
