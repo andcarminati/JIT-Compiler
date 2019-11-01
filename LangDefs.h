@@ -49,7 +49,9 @@ enum OperationType{
 
 enum VarType{
     REAL = 0,
-    INTEGER
+    INTEGER,
+    NONE,
+    UNIMPLEMENTED
 };
 
 #endif	/* LANGOPS_H */

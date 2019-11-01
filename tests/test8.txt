@@ -1,14 +1,14 @@
 
-extern printd(real double); 
+extern none printd(real double); 
 
-function inc(real a, real n){
+function real inc(real a, real n){
 
     a = n++;
     return a;
 }
 
 
-function main() {
+function real main() {
 
     printd(inc(1, 5));
     return 5;

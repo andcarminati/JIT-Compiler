@@ -74,17 +74,20 @@ int Lexer::getTok() {// gettok - Return the next token from standard input.
             return tok_for;
         if (IdentifierStr == "while")
             return tok_while;
-        if (IdentifierStr == "real"){
+        if (IdentifierStr == "real") {
             //printf("aqui\n");
             return tok_type;
-        }    
-        if (IdentifierStr == "integer"){
+        }
+        if (IdentifierStr == "integer") {
             return tok_type;
         }
-        if (IdentifierStr == "string"){
+        if (IdentifierStr == "string") {
             return tok_type;
-        }    
-       // printf("aqui2: ");
+        }
+        if (IdentifierStr == "none") {
+            return tok_type;
+        }
+        // printf("aqui2: ");
         //std::cout << IdentifierStr << "\n";
         return tok_identifier;
     }

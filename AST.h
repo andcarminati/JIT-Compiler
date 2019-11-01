@@ -240,14 +240,16 @@ public:
 class PrototypeAST : public PrimaryAST {
     std::string Name;
     std::vector<Arg> Args;
-
+    VarType returnType;
 public:
 
-    PrototypeAST(const std::string &name, std::vector<Arg> Args)
-    : Name(name), Args(std::move(Args)) {
+    PrototypeAST(VarType returnType, const std::string &name, std::vector<Arg> Args)
+    : returnType(returnType), Name(name), Args(std::move(Args)) {
     }
     
     void acceptIRGenVisitor(IRGen* visitor);
+    
+    VarType getReturnType(){return returnType;}
 
     const std::string &getName() const {
         return Name;

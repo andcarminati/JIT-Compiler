@@ -41,6 +41,25 @@ static void abort(std::string str, std::string str2) {
     exit(-1);
 }
 
+static Type* convertType(VarType t, LLVMContext* context) {
+
+    switch (t) {
+        case REAL:
+            return Type::getDoubleTy(*context);
+            break;
+        case INTEGER:
+            return Type::getInt64Ty(*context);
+            break;
+        case NONE:
+            return Type::getVoidTy(*context);
+            break;
+        default:
+            return nullptr;
+    }
+    return nullptr;
+}
+
+
 IRGen::IRGen(llvm::LLVMContext* TheContext) {
     this->TheContext = TheContext;
     Builder = std::make_unique<llvm::IRBuilder<>>(llvm::IRBuilder<>(*TheContext));
@@ -76,27 +95,27 @@ Function* IRGen::visitFunctionPrototypeImpl(PrototypeAST* node) {
     const std::string& Name = node->getName();
     // Make the function type:  double(double,double) etc.
     //std::vector<Type *> Doubles(Args.size(), Type::getDoubleTy(*TheContext));
-    
+
     std::vector<Type *> ArgTypes;
-    for(auto &arg : Args){
-        if(arg.getType() == REAL){
+    for (auto &arg : Args) {
+        if (arg.getType() == REAL) {
             ArgTypes.push_back(Type::getDoubleTy(*TheContext));
-        } else if(arg.getType() == INTEGER){
+        } else if (arg.getType() == INTEGER) {
             ArgTypes.push_back(Type::getInt64Ty(*TheContext));
         } else {
             std::cout << "unknown type\n";
         }
     }
-    
+
     FunctionType *FT =
-            FunctionType::get(Type::getDoubleTy(*TheContext), ArgTypes, false);
+            FunctionType::get(convertType(node->getReturnType(), TheContext), ArgTypes, false);
 
     Function *F =
             Function::Create(FT, Function::ExternalLinkage, Name, TheModule.get());
 
     // Set names for all arguments.
     unsigned Idx = 0;
-    for (auto &Arg : F->args()){
+    for (auto &Arg : F->args()) {
         Arg.setName(Args[Idx++].getName());
     }
 
@@ -133,6 +152,7 @@ Function* IRGen::visitFunctionImpl(FunctionAST* node) {
     return TheFunction;
 }
 
+
 // Generate allocas for every function parameter plus the return value. We can optimize
 // these allcoas with men2reg pass.
 
@@ -149,9 +169,9 @@ void IRGen::allocSpaceForParams(Function* function, BasicBlock* BB) {
                 Arg.getName());
         allocas.push_back(Alloca);
     }
-
+    
     // create Alloca for return value;
-    AllocaInst* Alloca = TmpB.CreateAlloca(Type::getDoubleTy(*TheContext), 0,
+    AllocaInst* Alloca = TmpB.CreateAlloca(function->getReturnType(), 0,
             "retvalue");
 
     symbolTable.insertSymbol("retvalue", StorageType::LOCAL, Alloca);
