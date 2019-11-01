@@ -75,17 +75,30 @@ Function* IRGen::visitFunctionPrototypeImpl(PrototypeAST* node) {
     std::vector<Arg>& Args = node->getArgs();
     const std::string& Name = node->getName();
     // Make the function type:  double(double,double) etc.
-    std::vector<Type *> Doubles(Args.size(), Type::getDoubleTy(*TheContext));
+    //std::vector<Type *> Doubles(Args.size(), Type::getDoubleTy(*TheContext));
+    
+    std::vector<Type *> ArgTypes;
+    for(auto &arg : Args){
+        if(arg.getType() == REAL){
+            ArgTypes.push_back(Type::getDoubleTy(*TheContext));
+        } else if(arg.getType() == INTEGER){
+            ArgTypes.push_back(Type::getInt64Ty(*TheContext));
+        } else {
+            std::cout << "unknown type\n";
+        }
+    }
+    
     FunctionType *FT =
-            FunctionType::get(Type::getDoubleTy(*TheContext), Doubles, false);
+            FunctionType::get(Type::getDoubleTy(*TheContext), ArgTypes, false);
 
     Function *F =
             Function::Create(FT, Function::ExternalLinkage, Name, TheModule.get());
 
     // Set names for all arguments.
     unsigned Idx = 0;
-    for (auto &Arg : F->args())
+    for (auto &Arg : F->args()){
         Arg.setName(Args[Idx++].getName());
+    }
 
     return F;
 }
@@ -132,7 +145,7 @@ void IRGen::allocSpaceForParams(Function* function, BasicBlock* BB) {
 
     // create Allocas
     for (auto &Arg : function->args()) {
-        AllocaInst* Alloca = TmpB.CreateAlloca(Type::getDoubleTy(*TheContext), 0,
+        AllocaInst* Alloca = TmpB.CreateAlloca(Arg.getType(), 0,
                 Arg.getName());
         allocas.push_back(Alloca);
     }
