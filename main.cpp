@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
     } 
     
     //auto file = std::make_unique<std::ifstream>(std::ifstream("tests/testif.txt"));
-    auto file = std::make_unique<std::ifstream>(std::ifstream("tests/test7.txt"));
+    auto file = std::make_unique<std::ifstream>(std::ifstream("tests/test8.txt"));
     
     if(!file->good()){
         std::cout << "Cannot open the specified file!" << std::endl;

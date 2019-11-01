@@ -72,7 +72,7 @@ void IRGen::visit(FunctionAST* node) {
 // Internal method for prototype function generation
 
 Function* IRGen::visitFunctionPrototypeImpl(PrototypeAST* node) {
-    std::vector<std::string>& Args = node->getArgs();
+    std::vector<Arg>& Args = node->getArgs();
     const std::string& Name = node->getName();
     // Make the function type:  double(double,double) etc.
     std::vector<Type *> Doubles(Args.size(), Type::getDoubleTy(*TheContext));
@@ -85,7 +85,7 @@ Function* IRGen::visitFunctionPrototypeImpl(PrototypeAST* node) {
     // Set names for all arguments.
     unsigned Idx = 0;
     for (auto &Arg : F->args())
-        Arg.setName(Args[Idx++]);
+        Arg.setName(Args[Idx++].getName());
 
     return F;
 }

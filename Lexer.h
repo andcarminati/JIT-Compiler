@@ -22,7 +22,7 @@
 #include <string>
 #include <map>
 
-#include "LangOps.h"
+#include "LangDefs.h"
 
 // The lexer returns tokens [0-255] if it is an unknown character, otherwise one
 // of these for known things.
@@ -50,7 +50,13 @@ enum Token {
     // return
     tok_return = -11,
 
-    tok_operator = 12
+    tok_operator = -12,
+            
+    //types
+    tok_real = -13,
+    tok_integer = -14,
+    tok_string = -15,
+    tok_type = -16
 };
 
 class Lexer {

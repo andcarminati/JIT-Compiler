@@ -25,7 +25,7 @@
 #include <iostream>
 
 #include "IRGen.h"
-#include "LangOps.h"
+#include "LangDefs.h"
 
 class IRGen;
 
@@ -92,6 +92,8 @@ public:
     IntegerNumberExprAST(long Val) : Val(Val) {
     }
 };
+
+
 
 /// VariableExprAST - Expression class for referencing a variable, like "a".
 
@@ -219,6 +221,16 @@ public:
 };
 
 
+class Arg {
+    std::string Name;
+    VarType type;
+    
+public:
+    Arg(std::string Name, VarType type): Name(Name), type(type){}
+    
+    std::string& getName(){return Name;}
+    VarType getType(){return type;}
+};
 
 
 /// PrototypeAST - This class represents the "prototype" for a function,
@@ -227,11 +239,11 @@ public:
 
 class PrototypeAST : public PrimaryAST {
     std::string Name;
-    std::vector<std::string> Args;
+    std::vector<Arg> Args;
 
 public:
 
-    PrototypeAST(const std::string &name, std::vector<std::string> Args)
+    PrototypeAST(const std::string &name, std::vector<Arg> Args)
     : Name(name), Args(std::move(Args)) {
     }
     
@@ -241,7 +253,7 @@ public:
         return Name;
     }
 
-    std::vector<std::string> &getArgs() {
+    std::vector<Arg> &getArgs() {
         return Args;
     }
 };

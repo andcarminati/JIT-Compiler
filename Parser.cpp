@@ -88,6 +88,21 @@ std::unique_ptr<PrimaryAST> Parser::nextConstruct() {
     return nullptr;
 }
 
+static Arg createArg(std::string& type, std::string& name){
+    
+    VarType t;
+    
+    if(type == "real"){
+        t = REAL;
+    } else if(type == "integer"){
+        t = INTEGER;
+    } else {
+        printf("erroooooooo\n");
+    }
+    return Arg(name, t);
+    
+}
+
 /// prototype
 ///   ::= id '(' id* ')'
 
@@ -106,14 +121,22 @@ std::unique_ptr<PrototypeAST> Parser::ParsePrototype(bool pure) {
             lexer->GetTokLine());
 
     // Read the list of argument names.
-    std::vector<std::string> ArgNames;
+    std::vector<Arg> ArgNames;
     lexer->getNextToken();
-    while (lexer->getCurrentToken() == tok_identifier) {
-        ArgNames.push_back(lexer->getIdentifierStr());
+    while (lexer->getCurrentToken() == tok_type) {
+        std::string type = lexer->getIdentifierStr();
+        // eat type
+        lexer->getNextToken();
+        if(lexer->getCurrentToken() != tok_identifier){
+            return LogError<PrototypeAST>("Expected parameter name after type in prototype",
+                lexer->GetTokLine());
+        }
+        std::string name = lexer->getIdentifierStr();
+        ArgNames.push_back(createArg(type, name));
         lexer->getNextToken();
         if (lexer->getCurrentToken() == ',') {
             lexer->getNextToken();
-            if (lexer->getCurrentToken() != tok_identifier) {
+            if (lexer->getCurrentToken() != tok_type) {
                 return LogError<PrototypeAST>("Untermined list of params in prototype",
                         lexer->GetTokLine());
             }

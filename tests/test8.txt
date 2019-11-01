@@ -1,0 +1,15 @@
+
+extern printd(real double); 
+
+function inc(real a, real n){
+
+    a = n++;
+    return a;
+}
+
+
+function main() {
+
+    printd(inc(1, 5));
+    return 5;
+}

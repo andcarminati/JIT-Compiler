@@ -47,6 +47,10 @@ enum OperationType{
     UNARY
 };
 
+enum VarType{
+    REAL = 0,
+    INTEGER
+};
 
 #endif	/* LANGOPS_H */
 
