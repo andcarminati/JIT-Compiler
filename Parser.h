@@ -38,7 +38,8 @@ private:
     std::unique_ptr<ExprAST> ParseIdentifierExpr();
     std::unique_ptr<ExprAST> ParseBinOpRHS(int ExprPrec,
                                               std::unique_ptr<ExprAST> LHS);
-    std::unique_ptr<ExprAST> ParseNumberExpr();
+    std::unique_ptr<ExprAST> ParseRealNumberExpr();
+    std::unique_ptr<ExprAST> ParseIntegerNumberExpr();
     std::unique_ptr<ExprAST> ParseParenExpr();
     std::unique_ptr<ExprAST> ParseReturnExpr();
     std::unique_ptr<ExprBlockAST> ParseExprBlock();

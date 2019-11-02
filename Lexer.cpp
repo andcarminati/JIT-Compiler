@@ -99,8 +99,15 @@ int Lexer::getTok() {// gettok - Return the next token from standard input.
             LastChar = file->get();
         } while (isdigit(LastChar) || LastChar == '.');
 
-        NumVal = strtod(NumStr.c_str(), nullptr);
-        return tok_number;
+        std::size_t found = NumStr.find('.');
+        if (found != std::string::npos) {
+            NumValReal = strtod(NumStr.c_str(), nullptr);
+            return tok_real;
+        } else {
+            NumValInteger = strtoll(NumStr.c_str(), nullptr, 0);
+            return tok_integer;
+        }
+
     }
 
     if (LastChar == '#') {
@@ -180,8 +187,12 @@ std::string Lexer::getIdentifierStr() {
     return IdentifierStr;
 }
 
-double Lexer::getNumVal() {
-    return NumVal;
+double Lexer::getNumValReal() {
+    return NumValReal;
+}
+
+double Lexer::getNumValInteger() {
+    return NumValInteger;
 }
 
 Operation Lexer::getOperation() {

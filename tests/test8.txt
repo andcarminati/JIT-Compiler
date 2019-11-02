@@ -1,5 +1,11 @@
 
-extern none printd(real double); 
+extern real printd(real double); 
+
+function real inc3(integer a, integer b){
+
+    #a+b;
+    return 0;
+}
 
 function real inc(real a, real n){
 
@@ -10,6 +16,6 @@ function real inc(real a, real n){
 
 function real main() {
 
-    printd(inc(1, 5));
+    printd(inc(1.0, 5));
     return 5;
 }

@@ -36,7 +36,7 @@ enum Token {
 
     // primary
     tok_identifier = -4,
-    tok_number = -5,
+    //tok_number = -5,
 
     // control
     tok_if = -6,
@@ -53,10 +53,14 @@ enum Token {
     tok_operator = -12,
             
     //types
-    tok_real = -13,
-    tok_integer = -14,
-    tok_string = -15,
-    tok_type = -16
+    tok_type_real = -13,
+    tok_type_integer = -14,
+    tok_type_string = -15,
+    tok_type = -16,
+    
+    // numbers
+    tok_real = -17,
+    tok_integer = -18
 };
 
 class Lexer {
@@ -70,7 +74,8 @@ public:
     std::string getIdentifierStr();
     Operation getOperation();
     OperationType getOpType();
-    double getNumVal();
+    double getNumValReal();
+    double getNumValInteger();
     int GetTokPrecedence();
     int GetTokLine();
 
@@ -81,7 +86,8 @@ private:
     std::map<Operation, int> BinopPrecedence;
     std::unique_ptr<std::ifstream> file;
     std::string IdentifierStr; // Filled in if tok_identifier
-    double NumVal; // Filled in if tok_number
+    double NumValReal; // Filled in if tok_real
+    double NumValInteger; // Filled in if tok_real
     Operation CurrOperation;
     OperationType CurrOpType;
     int getTok();

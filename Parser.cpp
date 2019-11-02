@@ -123,7 +123,7 @@ static Arg createArg(std::string& type, std::string& name) {
 std::unique_ptr<PrototypeAST> Parser::ParsePrototype(bool pure) {
 
     VarType t;
-    
+
     if (lexer->getCurrentToken() != tok_type)
         return LogError<PrototypeAST>("Expected return type in prototype",
             lexer->GetTokLine());
@@ -309,8 +309,11 @@ std::unique_ptr<ExprAST> Parser::ParsePrimary() {
         case tok_identifier:
             exp = ParseIdentifierExpr();
             break;
-        case tok_number:
-            exp = ParseNumberExpr();
+        case tok_real:
+            exp = ParseRealNumberExpr();
+            break;
+        case tok_integer:
+            exp = ParseIntegerNumberExpr();
             break;
         case '(':
             exp = ParseParenExpr();
@@ -435,8 +438,14 @@ std::unique_ptr<ExprAST> Parser::ParseBinOpRHS(int ExprPrec,
     }
 }
 
-std::unique_ptr<ExprAST> Parser::ParseNumberExpr() {
-    auto Result = std::make_unique<DoubleNumberExprAST>(lexer->getNumVal());
+std::unique_ptr<ExprAST> Parser::ParseRealNumberExpr() {
+    auto Result = std::make_unique<DoubleNumberExprAST>(lexer->getNumValReal());
+    lexer->getNextToken(); // consume the number
+    return std::move(Result);
+}
+
+std::unique_ptr<ExprAST> Parser::ParseIntegerNumberExpr() {
+    auto Result = std::make_unique<IntegerNumberExprAST>(lexer->getNumValInteger());
     lexer->getNextToken(); // consume the number
     return std::move(Result);
 }

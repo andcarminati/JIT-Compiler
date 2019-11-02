@@ -11,10 +11,8 @@
             <file>file:/home/andreu/NetBeansProjects/Interpreter/Parser.h</file>
             <file>file:/home/andreu/NetBeansProjects/Interpreter/AST.h</file>
             <file>file:/home/andreu/NetBeansProjects/Interpreter/Lexer.cpp</file>
+            <file>file:/home/andreu/NetBeansProjects/Interpreter/LangDefs.h</file>
             <file>file:/home/andreu/NetBeansProjects/Interpreter/Parser.cpp</file>
-            <file>file:/home/andreu/NetBeansProjects/Interpreter/LangOps.h</file>
-            <file>file:/home/andreu/NetBeansProjects/Interpreter/IRGen.h</file>
-            <file>file:/home/andreu/NetBeansProjects/Interpreter/SymbolTable.h</file>
             <file>file:/home/andreu/NetBeansProjects/Interpreter/main.cpp</file>
             <file>file:/home/andreu/NetBeansProjects/Interpreter/IRGen.cpp</file>
         </group>

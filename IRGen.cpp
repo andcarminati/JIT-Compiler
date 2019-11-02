@@ -59,7 +59,6 @@ static Type* convertType(VarType t, LLVMContext* context) {
     return nullptr;
 }
 
-
 IRGen::IRGen(llvm::LLVMContext* TheContext) {
     this->TheContext = TheContext;
     Builder = std::make_unique<llvm::IRBuilder<>>(llvm::IRBuilder<>(*TheContext));
@@ -169,7 +168,7 @@ void IRGen::allocSpaceForParams(Function* function, BasicBlock* BB) {
                 Arg.getName());
         allocas.push_back(Alloca);
     }
-    
+
     // create Alloca for return value;
     AllocaInst* Alloca = TmpB.CreateAlloca(function->getReturnType(), 0,
             "retvalue");
@@ -357,9 +356,22 @@ Value* IRGen::visit(BinaryExprAST* node) {
     if (!L || !R)
         return nullptr;
 
+    if(L->getType() != R->getType()){
+        abort("Type incompatibility between operands", "");
+        return nullptr;
+    }
+    
     switch (Op) {
         case Operation::ADD:
-            return Builder->CreateFAdd(L, R, "addtmp");
+            if(L->getType() == Type::getDoubleTy(*TheContext)){
+                return Builder->CreateFAdd(L, R, "addtmp");
+            } else if(L->getType() == Type::getInt64Ty(*TheContext)){
+                return Builder->CreateAdd(L, R, "addtmp");
+            } else {
+                abort("Unimplemented operand type", "");
+                return nullptr;
+            }
+            
         case Operation::SUB:
             return Builder->CreateFSub(L, R, "subtmp");
         case Operation::MUL:
@@ -457,13 +469,24 @@ llvm::Value* IRGen::visit(CallExprAST* node) {
         abort("Incorrect # arguments passed", "");
         return nullptr;
     }
+    //check parameter compatibility and construct the vector
+    Function::arg_iterator I = CalleeF->arg_begin();
     std::vector<Value *> ArgsV;
     for (unsigned i = 0, e = Args.size(); i != e; ++i) {
-        ArgsV.push_back(Args[i]->acceptIRGenVisitor(this));
+        // real argument
+        Argument& ActualArg = *I;
+        Value* Arg = Args[i]->acceptIRGenVisitor(this);
+
+        //check types
+        if (ActualArg.getType() != Arg->getType()) {
+            abort("Type incompatibility between provided and expected arguments", "");
+            return nullptr;
+        }
+        I++;
+        ArgsV.push_back(Arg);
         if (!ArgsV.back())
             return nullptr;
     }
-
     return Builder->CreateCall(CalleeF, ArgsV, "calltmp");
 }
 
