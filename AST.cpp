@@ -34,7 +34,11 @@ llvm::Value* ReturnAST::acceptIRGenVisitor(IRGen* visitor) {
     return nullptr;
 }
 
-llvm::Value* DoubleNumberExprAST::acceptIRGenVisitor(IRGen* visitor) {
+llvm::Value* RealNumberExprAST::acceptIRGenVisitor(IRGen* visitor) {
+    return visitor->visit(this);
+}
+
+llvm::Value* IntegerNumberExprAST::acceptIRGenVisitor(IRGen* visitor) {
     return visitor->visit(this);
 }
 

@@ -68,12 +68,12 @@ public:
 
 /// NumberExprAST - Expression class for numeric literals like "1.0".
 
-class DoubleNumberExprAST : public ExprAST {
+class RealNumberExprAST : public ExprAST {
     double Val;
 
 public:
 
-    DoubleNumberExprAST(double Val) : Val(Val) {
+    RealNumberExprAST(double Val) : Val(Val) {
     }
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
 
@@ -85,11 +85,16 @@ public:
 /// NumberExprAST - Expression class for numeric literals like "1.0".
 
 class IntegerNumberExprAST : public ExprAST {
-    long Val;
+    long long Val;
 
 public:
 
     IntegerNumberExprAST(long Val) : Val(Val) {
+    }
+    virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
+
+    long long getVal() {
+        return Val;
     }
 };
 
@@ -161,8 +166,8 @@ public:
     std::unique_ptr<ExprAST> getLRHS() {
         return std::move(LRHS);
     }
-    
-    bool isPrefix(){
+
+    bool isPrefix() {
         return prefix;
     }
 };
@@ -216,20 +221,32 @@ public:
     : Callee(Callee), Args(std::move(Args)) {
     }
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
-    std::string& getCalee(){return Callee;}
-    std::vector<std::unique_ptr<ExprAST>> getArgs(){return std::move(Args);}
-};
 
+    std::string& getCalee() {
+        return Callee;
+    }
+
+    std::vector<std::unique_ptr<ExprAST>> getArgs() {
+        return std::move(Args);
+    }
+};
 
 class Arg {
     std::string Name;
     VarType type;
-    
+
 public:
-    Arg(std::string Name, VarType type): Name(Name), type(type){}
-    
-    std::string& getName(){return Name;}
-    VarType getType(){return type;}
+
+    Arg(std::string Name, VarType type) : Name(Name), type(type) {
+    }
+
+    std::string& getName() {
+        return Name;
+    }
+
+    VarType getType() {
+        return type;
+    }
 };
 
 
@@ -246,10 +263,12 @@ public:
     PrototypeAST(VarType returnType, const std::string &name, std::vector<Arg> Args)
     : returnType(returnType), Name(name), Args(std::move(Args)) {
     }
-    
+
     void acceptIRGenVisitor(IRGen* visitor);
-    
-    VarType getReturnType(){return returnType;}
+
+    VarType getReturnType() {
+        return returnType;
+    }
 
     const std::string &getName() const {
         return Name;

@@ -17,6 +17,7 @@
 
 
 #include <llvm/ADT/APFloat.h>
+#include <llvm/ADT/APSInt.h>
 #include <llvm/ADT/STLExtras.h>
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Constants.h>
@@ -307,11 +308,18 @@ llvm::Value* IRGen::visit(VariableExprAST* node) {
     return nullptr;
 }
 
-// DoubleNumberExprAST overload.
+// RealNumberExprAST overload.
 
-Value* IRGen::visit(DoubleNumberExprAST* node) {
+Value* IRGen::visit(RealNumberExprAST* node) {
     return ConstantFP::get(*TheContext, APFloat(node->getVal()));
 }
+
+// IntegerNumberExprAST overload.
+
+Value* IRGen::visit(IntegerNumberExprAST* node) {
+    return ConstantInt::get(*TheContext, APSInt(64, node->getVal()));
+}
+
 
 // BinaryExprAST overload.
 
@@ -356,34 +364,71 @@ Value* IRGen::visit(BinaryExprAST* node) {
     if (!L || !R)
         return nullptr;
 
-    if(L->getType() != R->getType()){
+    if (L->getType() != R->getType()) {
         abort("Type incompatibility between operands", "");
         return nullptr;
     }
-    
+
     switch (Op) {
         case Operation::ADD:
-            if(L->getType() == Type::getDoubleTy(*TheContext)){
+            if (L->getType() == Type::getDoubleTy(*TheContext)) {
                 return Builder->CreateFAdd(L, R, "addtmp");
-            } else if(L->getType() == Type::getInt64Ty(*TheContext)){
+            } else if (L->getType() == Type::getInt64Ty(*TheContext)) {
                 return Builder->CreateAdd(L, R, "addtmp");
             } else {
                 abort("Unimplemented operand type", "");
                 return nullptr;
             }
-            
+
         case Operation::SUB:
-            return Builder->CreateFSub(L, R, "subtmp");
+            if (L->getType() == Type::getDoubleTy(*TheContext)) {
+                return Builder->CreateFSub(L, R, "subtmp");
+            } else if (L->getType() == Type::getInt64Ty(*TheContext)) {
+                return Builder->CreateSub(L, R, "subtmp");
+            } else {
+                abort("Unimplemented operand type", "");
+                return nullptr;
+            }
+
         case Operation::MUL:
-            return Builder->CreateFMul(L, R, "multmp");
+
+            if (L->getType() == Type::getDoubleTy(*TheContext)) {
+                return Builder->CreateFMul(L, R, "multmp");
+            } else if (L->getType() == Type::getInt64Ty(*TheContext)) {
+                return Builder->CreateMul(L, R, "multmp");
+            } else {
+                abort("Unimplemented operand type", "");
+                return nullptr;
+            }
+
         case Operation::EQ:
-            L = Builder->CreateFCmpUEQ(L, R, "eqtmp");
-            // Convert bool 0/1 to double 0.0 or 1.0
-            return Builder->CreateUIToFP(L, Type::getDoubleTy(*TheContext), "booltmp");
+            if (L->getType() == Type::getDoubleTy(*TheContext)) {
+                L = Builder->CreateFCmpUEQ(L, R, "eqtmp");
+                // Convert bool 0/1 to double 0.0 or 1.0
+                return Builder->CreateUIToFP(L, Type::getDoubleTy(*TheContext), "booltmp");
+            } else if (L->getType() == Type::getInt64Ty(*TheContext)) {
+                L = Builder->CreateICmpEQ(L, R, "eqtmp");
+                return L;
+            } else {
+                abort("Unimplemented operand type", "");
+                return nullptr;
+            }
+
+
         case Operation::LT:
-            L = Builder->CreateFCmpULT(L, R, "cmptmp");
-            // Convert bool 0/1 to double 0.0 or 1.0
-            return Builder->CreateUIToFP(L, Type::getDoubleTy(*TheContext), "booltmp");
+           
+            if (L->getType() == Type::getDoubleTy(*TheContext)) {
+                 L = Builder->CreateFCmpULT(L, R, "cmptmp");
+                // Convert bool 0/1 to double 0.0 or 1.0
+                return Builder->CreateUIToFP(L, Type::getDoubleTy(*TheContext), "booltmp");
+            } else if (L->getType() == Type::getInt64Ty(*TheContext)) {
+                L = Builder->CreateICmpSLT(L, R, "eqtmp");
+                return L;
+            } else {
+                abort("Unimplemented operand type", "");
+                return nullptr;
+            }
+
         default:
             abort("Unknown operand: ", std::string(1, Op));
             break;

@@ -439,7 +439,7 @@ std::unique_ptr<ExprAST> Parser::ParseBinOpRHS(int ExprPrec,
 }
 
 std::unique_ptr<ExprAST> Parser::ParseRealNumberExpr() {
-    auto Result = std::make_unique<DoubleNumberExprAST>(lexer->getNumValReal());
+    auto Result = std::make_unique<RealNumberExprAST>(lexer->getNumValReal());
     lexer->getNextToken(); // consume the number
     return std::move(Result);
 }
