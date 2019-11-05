@@ -317,7 +317,7 @@ Value* IRGen::visit(RealNumberExprAST* node) {
 // IntegerNumberExprAST overload.
 
 Value* IRGen::visit(IntegerNumberExprAST* node) {
-    return ConstantInt::get(*TheContext, APSInt(64, node->getVal()));
+    return ConstantInt::get(*TheContext, APSInt::get(node->getVal()));
 }
 
 
@@ -531,6 +531,11 @@ llvm::Value* IRGen::visit(CallExprAST* node) {
         ArgsV.push_back(Arg);
         if (!ArgsV.back())
             return nullptr;
+    }
+    // if is a void function, do not save the return;
+    if(CalleeF->getReturnType() == Type::getVoidTy(*TheContext)){
+        Builder->CreateCall(CalleeF, ArgsV);
+        return nullptr;
     }
     return Builder->CreateCall(CalleeF, ArgsV, "calltmp");
 }

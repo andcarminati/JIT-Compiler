@@ -1,5 +1,6 @@
 
-extern real printd(real double); 
+extern none printreal(real double); 
+extern none printinteger(integer number); 
 
 function real inc3(integer a, integer b){
 
@@ -8,14 +9,13 @@ function real inc3(integer a, integer b){
 }
 
 function real inc(real a, real n){
-
     a = n++;
     return a;
 }
 
 
 function real main() {
-
-    printd(inc(1.0, 5.0));
+    printinteger(30);
+    printreal(inc(1.0, 5.0));
     return 5.0;
 }

@@ -1,0 +1,10 @@
+
+extern none printreal(real double); 
+extern none printinteger(integer number); 
+
+
+function real main() {
+    printinteger(3);
+    printreal(3.0);
+    return 5.0;
+}

@@ -20,14 +20,17 @@
 #endif
 
 /// putchard - putchar that takes a double and returns 0.
-extern "C" DLLEXPORT double putchard(double X) {
+extern "C" DLLEXPORT void putchard(long long X) {
   fputc((char)X, stderr);
-  return 0;
 }
 
-/// printd - printf that takes a double prints it as "%f\n", returning 0.
-extern "C" DLLEXPORT double printd(double X) {
+/// printreal - printf that takes a double prints it as "%f\n".
+extern "C" DLLEXPORT void printreal(double X) {
   fprintf(stderr, "%f\n", X);
-  return 0;
+}
+
+/// printinteger - printf that takes an integer prints it as "%lld\n".
+extern "C" DLLEXPORT void printinteger(long long X) {
+  fprintf(stderr, "%lld\n", X);
 }
 
