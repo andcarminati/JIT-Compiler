@@ -93,6 +93,7 @@ void IRGen::visit(FunctionAST* node) {
 Function* IRGen::visitFunctionPrototypeImpl(PrototypeAST* node) {
     std::vector<Arg>& Args = node->getArgs();
     const std::string& Name = node->getName();
+    auto DI = node->getDebugInfo();
     // Make the function type:  double(double,double) etc.
     //std::vector<Type *> Doubles(Args.size(), Type::getDoubleTy(*TheContext));
 
@@ -103,7 +104,7 @@ Function* IRGen::visitFunctionPrototypeImpl(PrototypeAST* node) {
         } else if (arg.getType() == INTEGER) {
             ArgTypes.push_back(Type::getInt64Ty(*TheContext));
         } else {
-            std::cout << "unknown type\n";
+            std::cout << "unknown type in " << DI->getInfo() << std::endl;
         }
     }
 
@@ -128,7 +129,7 @@ Function* IRGen::visitFunctionImpl(FunctionAST* node) {
     // First, check for an existing function from a previous 'extern' declaration.
     const std::string& Name = node->getName();
     Function *TheFunction = TheModule->getFunction(Name);
-
+    auto DI = node->getDebugInfo();
     if (!TheFunction) {
         // generator must owns the prototype pointer  
         std::unique_ptr<PrototypeAST> proto = node->getProto();
@@ -142,7 +143,7 @@ Function* IRGen::visitFunctionImpl(FunctionAST* node) {
 
     if (!TheFunction->empty()) {
         //rever
-        std::cout << "Function already defined!\n";
+        std::cout << "Function already defined: " << DI->getInfo() << std::endl;
         return nullptr;
     }
 

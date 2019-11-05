@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
         std::cout << "Cannot open the specified file!" << std::endl;
         exit(-1);
     }
-    auto lexer = std::make_unique<Lexer>(Lexer(std::move(file)));
+    auto lexer = std::make_unique<Lexer>(Lexer(std::move(file), "tests/test9.txt"));
     auto parser = std::make_shared<Parser>(Parser(std::move(lexer)));
     
     Driver(parser);

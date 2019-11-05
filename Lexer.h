@@ -65,7 +65,7 @@ enum Token {
 
 class Lexer {
 public:
-    Lexer(std::unique_ptr<std::ifstream>);
+    Lexer(std::unique_ptr<std::ifstream>, std::string);
     //Lexer(const Lexer& orig) { std::cout << "teste1";};
     //virtual ~Lexer(){}
 
@@ -78,6 +78,7 @@ public:
     double getNumValInteger();
     int GetTokPrecedence();
     int GetTokLine();
+    std::string& getFileName();
 
 private:
     int CurTok = ';';
@@ -90,6 +91,7 @@ private:
     double NumValInteger; // Filled in if tok_real
     Operation CurrOperation;
     OperationType CurrOpType;
+    std::string FileName;
     int getTok();
 
 };

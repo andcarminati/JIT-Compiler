@@ -29,17 +29,44 @@
 
 class IRGen;
 
-/// ExprAST - Base class for all expression nodes.
-
-class PrimaryAST {
+class DebugInfo {
 public:
 
+    DebugInfo(int line, int column, std::string file) : line(line), column(column), file(file) {
+    }
+
+    std::string getInfo() {
+        std::string str = std::string(file);
+        str.append(": line " + std::to_string(line) + " col " + std::to_string(column));
+        return str;
+    }
+
+private:
+    int line;
+    int column;
+    std::string file;
+};
+
+class BaseAST {
+public:    
+    BaseAST(std::unique_ptr<DebugInfo> DI): DI(std::move(DI)) {}
+    std::unique_ptr<DebugInfo> getDebugInfo(){return std::move(DI);}
+private:
+    std::unique_ptr<DebugInfo> DI;
+};
+
+/// ExprAST - Base class for all expression nodes.
+
+class PrimaryAST : public BaseAST{
+public:
+    
+    PrimaryAST(std::unique_ptr<DebugInfo> DI) : BaseAST(std::move(DI)) {}
+    
     virtual ~PrimaryAST() {
     }
 
     virtual void acceptIRGenVisitor(IRGen* visitor) {
     }
-
 };
 
 
@@ -260,8 +287,8 @@ class PrototypeAST : public PrimaryAST {
     VarType returnType;
 public:
 
-    PrototypeAST(VarType returnType, const std::string &name, std::vector<Arg> Args)
-    : returnType(returnType), Name(name), Args(std::move(Args)) {
+    PrototypeAST(std::unique_ptr<DebugInfo> DI, VarType returnType, const std::string &name, std::vector<Arg> Args)
+    : PrimaryAST(std::move(DI)), returnType(returnType), Name(name), Args(std::move(Args)) {
     }
 
     void acceptIRGenVisitor(IRGen* visitor);
@@ -309,9 +336,9 @@ class FunctionAST : public PrimaryAST {
 
 public:
 
-    FunctionAST(std::unique_ptr<PrototypeAST> Proto,
+    FunctionAST(std::unique_ptr<DebugInfo> DI, std::unique_ptr<PrototypeAST> Proto,
             std::unique_ptr<ExprBlockAST> Body)
-    : Proto(std::move(Proto)), Body(std::move(Body)) {
+    : PrimaryAST(std::move(DI)), Proto(std::move(Proto)), Body(std::move(Body)) {
     }
     void acceptIRGenVisitor(IRGen* visitor);
 

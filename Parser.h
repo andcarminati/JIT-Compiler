@@ -31,6 +31,8 @@ public:
 private:
     std::unique_ptr<Lexer> lexer;
     
+    std::unique_ptr<DebugInfo> genDebugInfo();
+    
     std::unique_ptr<FunctionAST> ParseDefinition();
     std::unique_ptr<PrototypeAST> ParsePrototype(bool pure);
     std::unique_ptr<ExprAST> ParseExpression();
@@ -45,6 +47,7 @@ private:
     std::unique_ptr<ExprBlockAST> ParseExprBlock();
     std::unique_ptr<ExprAST> ParseIfExpr();
     std::unique_ptr<ExprAST> ParseUnaryExpr();
+  
     bool failed = false;
     void fail();
     

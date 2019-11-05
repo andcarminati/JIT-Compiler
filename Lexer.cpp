@@ -22,8 +22,9 @@
 #include <cstdlib>
 #include <iostream>
 
-Lexer::Lexer(std::unique_ptr<std::ifstream> file) {
+Lexer::Lexer(std::unique_ptr<std::ifstream> file, std::string FileName) {
     this->file = std::move(file);
+    this->FileName = FileName;
     // Install standard binary operators.
     // 1 is lowest precedence.
     BinopPrecedence[Operation::ASSIGN] = 2;
@@ -217,4 +218,8 @@ int Lexer::GetTokPrecedence() {
 
 int Lexer::GetTokLine() {
     return line;
+}
+
+std::string& Lexer::getFileName(){
+    return FileName;
 }

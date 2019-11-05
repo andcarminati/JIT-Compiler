@@ -34,6 +34,11 @@ void LogWarn(const char *Str, int line) {
     fprintf(stderr, "Compiler warning: %s -line %d\n", Str, line);
 }
 
+std::unique_ptr<DebugInfo> Parser::genDebugInfo(){
+    
+    return std::make_unique<DebugInfo>(DebugInfo(lexer->GetTokLine(), 0, lexer->getFileName()));
+}
+
 /*
 std::unique_ptr<ExprAST> LogError(const char *Str, int line) {
     fprintf(stderr, "LogError: %s - line %d\n", Str, line);
@@ -123,6 +128,7 @@ static Arg createArg(std::string& type, std::string& name) {
 std::unique_ptr<PrototypeAST> Parser::ParsePrototype(bool pure) {
 
     VarType t;
+    auto DI = genDebugInfo();
 
     if (lexer->getCurrentToken() != tok_type)
         return LogError<PrototypeAST>("Expected return type in prototype",
@@ -187,7 +193,7 @@ std::unique_ptr<PrototypeAST> Parser::ParsePrototype(bool pure) {
 
     //std::cout << "Func name " << FnName << std::endl;
     //std::cout << "Func args " << ArgNames.size() << std::endl;
-    return std::make_unique<PrototypeAST>(t, FnName, std::move(ArgNames));
+    return std::make_unique<PrototypeAST>(std::move(DI), t, FnName, std::move(ArgNames));
 }
 
 /// block of expressions {}
@@ -242,6 +248,7 @@ std::unique_ptr<ExprBlockAST> Parser::ParseExprBlock() {
 
 std::unique_ptr<FunctionAST> Parser::ParseDefinition() {
     lexer->getNextToken(); // eat def.
+    auto DI = genDebugInfo();
     auto Proto = ParsePrototype(false);
     if (!Proto) return nullptr;
 
@@ -275,7 +282,7 @@ std::unique_ptr<FunctionAST> Parser::ParseDefinition() {
                 lexer->GetTokLine());
     }
 
-    return std::make_unique<FunctionAST>(std::move(Proto), std::move(block));
+    return std::make_unique<FunctionAST>(std::move(DI), std::move(Proto), std::move(block));
 }
 
 /// expression
