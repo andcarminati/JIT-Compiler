@@ -5,6 +5,7 @@
                    displayName="Arquivos de Cabeçalho"
                    projectFiles="true">
       <itemPath>AST.h</itemPath>
+      <itemPath>DebugInfo.h</itemPath>
       <itemPath>Executor.h</itemPath>
       <itemPath>IRGen.h</itemPath>
       <itemPath>JIT.h</itemPath>
@@ -69,6 +70,8 @@
       </item>
       <item path="AST.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="DebugInfo.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Executor.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Executor.h" ex="false" tool="3" flavor2="0">
@@ -131,6 +134,8 @@
       <item path="AST.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="AST.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="DebugInfo.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Executor.cpp" ex="false" tool="1" flavor2="0">
       </item>

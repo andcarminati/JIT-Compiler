@@ -199,7 +199,9 @@ std::unique_ptr<PrototypeAST> Parser::ParsePrototype(bool pure) {
 /// block of expressions {}
 
 std::unique_ptr<ExprBlockAST> Parser::ParseExprBlock() {
-    std::unique_ptr<ExprBlockAST> block = std::make_unique<ExprBlockAST>(ExprBlockAST());
+    
+    auto DI = genDebugInfo();
+    std::unique_ptr<ExprBlockAST> block = std::make_unique<ExprBlockAST>(std::move(DI));
 
     if (lexer->getCurrentToken() != '{') {
         fail();
@@ -340,6 +342,7 @@ std::unique_ptr<ExprAST> Parser::ParsePrimary() {
 }
 
 std::unique_ptr<ExprAST> Parser::ParseUnaryExpr() {
+    auto DI = genDebugInfo();
     Operation op = lexer->getOperation();
     std::unique_ptr<ExprAST> exp;
 
@@ -352,7 +355,7 @@ std::unique_ptr<ExprAST> Parser::ParseUnaryExpr() {
     exp = ParseIdentifierExpr();
 
 
-    return std::make_unique<UnaryExprAST>(op, std::move(exp), true);
+    return std::make_unique<UnaryExprAST>(std::move(DI), op, std::move(exp), true);
 }
 
 
@@ -361,15 +364,17 @@ std::unique_ptr<ExprAST> Parser::ParseUnaryExpr() {
 ///   ::= identifier '(' expression* ')'
 
 std::unique_ptr<ExprAST> Parser::ParseIdentifierExpr() {
+    
+    auto DI = genDebugInfo();
     std::string IdName = lexer->getIdentifierStr();
     std::unique_ptr<ExprAST> exp;
     lexer->getNextToken(); // eat identifier.
     if (lexer->getCurrentToken() != '(') { // Simple variable ref.
-        auto expTemp = std::make_unique<VariableExprAST>(IdName);
+        auto expTemp = std::make_unique<VariableExprAST>(std::move(DI), IdName);
         // we can have an unary expression i.e. ++, --.
         if (lexer->getCurrentToken() == Token::tok_operator &&
                 lexer->getOpType() == OperationType::UNARY) {
-            exp = std::make_unique<UnaryExprAST>(lexer->getOperation(), std::move(expTemp), false);
+            exp = std::make_unique<UnaryExprAST>(std::move(DI), lexer->getOperation(), std::move(expTemp), false);
             lexer->getNextToken(); // eat operator
         } else {
             // or a simple variable expression
@@ -399,7 +404,7 @@ std::unique_ptr<ExprAST> Parser::ParseIdentifierExpr() {
         }
         // Eat the ')'.
         lexer->getNextToken();
-        exp = std::make_unique<CallExprAST>(IdName, std::move(Args));
+        exp = std::make_unique<CallExprAST>(std::move(DI), IdName, std::move(Args));
         // assignment expression   
 
     }
@@ -412,6 +417,7 @@ std::unique_ptr<ExprAST> Parser::ParseIdentifierExpr() {
 
 std::unique_ptr<ExprAST> Parser::ParseBinOpRHS(int ExprPrec,
         std::unique_ptr<ExprAST> LHS) {
+    auto DI = genDebugInfo();
     // If this is a binop, find its precedence.
     while (true) {
         int TokPrec = lexer->GetTokPrecedence();
@@ -440,19 +446,21 @@ std::unique_ptr<ExprAST> Parser::ParseBinOpRHS(int ExprPrec,
         }
 
         // Merge LHS/RHS.
-        LHS = std::make_unique<BinaryExprAST>(BinOp, std::move(LHS),
+        LHS = std::make_unique<BinaryExprAST>(std::move(DI), BinOp, std::move(LHS),
                 std::move(RHS));
     }
 }
 
 std::unique_ptr<ExprAST> Parser::ParseRealNumberExpr() {
-    auto Result = std::make_unique<RealNumberExprAST>(lexer->getNumValReal());
+    auto DI = genDebugInfo();
+    auto Result = std::make_unique<RealNumberExprAST>(std::move(DI), lexer->getNumValReal());
     lexer->getNextToken(); // consume the number
     return std::move(Result);
 }
 
 std::unique_ptr<ExprAST> Parser::ParseIntegerNumberExpr() {
-    auto Result = std::make_unique<IntegerNumberExprAST>(lexer->getNumValInteger());
+    auto DI = genDebugInfo();
+    auto Result = std::make_unique<IntegerNumberExprAST>(std::move(DI), lexer->getNumValInteger());
     lexer->getNextToken(); // consume the number
     return std::move(Result);
 }
@@ -474,18 +482,21 @@ std::unique_ptr<ExprAST> Parser::ParseParenExpr() {
 }
 
 std::unique_ptr<ExprAST> Parser::ParseReturnExpr() {
+    
+    auto DI = genDebugInfo();
     lexer->getNextToken(); // eat 'return'
     auto V = ParseExpression();
     if (!V) {
         return nullptr;
     }
-    return std::make_unique<ReturnAST>(ReturnAST(std::move(V)));
+    return std::make_unique<ReturnAST>(std::move(DI), std::move(V));
 }
 
 
 /// ifexpr ::= 'if' expression 'then' expression 'else' expression
 
 std::unique_ptr<ExprAST> Parser::ParseIfExpr() {
+    auto DI = genDebugInfo();
     lexer->getNextToken(); // eat the if.
     if (lexer->getCurrentToken() != '(') {
         fail();
@@ -522,6 +533,6 @@ std::unique_ptr<ExprAST> Parser::ParseIfExpr() {
             return nullptr;
     }
     //lexer->getNextToken();
-    return std::make_unique<IfExprAST>(std::move(Cond), std::move(Then),
+    return std::make_unique<IfExprAST>(std::move(DI), std::move(Cond), std::move(Then),
             std::move(Else));
 }

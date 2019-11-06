@@ -26,31 +26,19 @@
 
 #include "IRGen.h"
 #include "LangDefs.h"
+#include "DebugInfo.h"
 
 class IRGen;
 
-class DebugInfo {
-public:
-
-    DebugInfo(int line, int column, std::string file) : line(line), column(column), file(file) {
-    }
-
-    std::string getInfo() {
-        std::string str = std::string(file);
-        str.append(": line " + std::to_string(line) + " col " + std::to_string(column));
-        return str;
-    }
-
-private:
-    int line;
-    int column;
-    std::string file;
-};
+/// BaseAST - base for all other classes
 
 class BaseAST {
 public:    
     BaseAST(std::unique_ptr<DebugInfo> DI): DI(std::move(DI)) {}
     std::unique_ptr<DebugInfo> getDebugInfo(){return std::move(DI);}
+    
+    virtual ~BaseAST(){}
+    
 private:
     std::unique_ptr<DebugInfo> DI;
 };
@@ -72,11 +60,12 @@ public:
 
 /// ExprAST - Base class for all expression nodes.
 
-class ExprAST {
+class ExprAST: public BaseAST {
 public:
 
-    virtual ~ExprAST() {
-    }
+    ExprAST(std::unique_ptr<DebugInfo> DI) : BaseAST(std::move(DI)) {}
+    
+    virtual ~ExprAST() {}
 
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor) {
         printf("Not implemented AST node\n");
@@ -100,7 +89,7 @@ class RealNumberExprAST : public ExprAST {
 
 public:
 
-    RealNumberExprAST(double Val) : Val(Val) {
+    RealNumberExprAST(std::unique_ptr<DebugInfo> DI, double Val) : ExprAST(std::move(DI)), Val(Val) {
     }
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
 
@@ -116,7 +105,7 @@ class IntegerNumberExprAST : public ExprAST {
 
 public:
 
-    IntegerNumberExprAST(long Val) : Val(Val) {
+    IntegerNumberExprAST(std::unique_ptr<DebugInfo> DI, long Val) : ExprAST(std::move(DI)), Val(Val) {
     }
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
 
@@ -134,8 +123,11 @@ class VariableExprAST : public ExprAST {
 
 public:
 
-    VariableExprAST(const std::string &Name) : Name(Name) {
+    VariableExprAST(std::unique_ptr<DebugInfo> DI, const std::string &Name) : ExprAST(std::move(DI)), Name(Name) {
     }
+    
+    virtual ~VariableExprAST(){}
+    
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
 
     std::string& getName() {
@@ -153,9 +145,9 @@ class BinaryExprAST : public ExprAST {
 
 public:
 
-    BinaryExprAST(Operation op, std::unique_ptr<ExprAST> LHS,
+    BinaryExprAST(std::unique_ptr<DebugInfo> DI, Operation op, std::unique_ptr<ExprAST> LHS,
             std::unique_ptr<ExprAST> RHS)
-    : Op(op), LHS(std::move(LHS)), RHS(std::move(RHS)) {
+    : ExprAST(std::move(DI)), Op(op), LHS(std::move(LHS)), RHS(std::move(RHS)) {
     }
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
 
@@ -181,8 +173,8 @@ class UnaryExprAST : public ExprAST {
 
 public:
 
-    UnaryExprAST(Operation op, std::unique_ptr<ExprAST> LRHS, bool prefix)
-    : Op(op), LRHS(std::move(LRHS)), prefix(prefix) {
+    UnaryExprAST(std::unique_ptr<DebugInfo> DI, Operation op, std::unique_ptr<ExprAST> LRHS, bool prefix)
+    : ExprAST(std::move(DI)), Op(op), LRHS(std::move(LRHS)), prefix(prefix) {
     }
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
 
@@ -207,9 +199,9 @@ class AssignmentAST : public ExprAST {
     std::unique_ptr<ExprAST> RHS;
 public:
 
-    AssignmentAST(const std::string &VarName,
+    AssignmentAST(std::unique_ptr<DebugInfo> DI, const std::string &VarName,
             std::unique_ptr<ExprAST> RHS)
-    : VarName(VarName), RHS(std::move(RHS)) {
+    : ExprAST(std::move(DI)), VarName(VarName), RHS(std::move(RHS)) {
     }
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
 };
@@ -220,8 +212,11 @@ class ReturnAST : public ExprAST {
     std::unique_ptr<ExprAST> RHS;
 public:
 
-    ReturnAST(std::unique_ptr<ExprAST> RHS) : RHS(std::move(RHS)) {
+    ReturnAST(std::unique_ptr<DebugInfo> DI, std::unique_ptr<ExprAST> RHS) : ExprAST(std::move(DI)), RHS(std::move(RHS)) {
     }
+    
+    //virtual ~ReturnAST(){}
+    
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
 
     virtual bool isUncondTransfer() {
@@ -243,9 +238,9 @@ class CallExprAST : public ExprAST {
 
 public:
 
-    CallExprAST(const std::string &Callee,
+    CallExprAST(std::unique_ptr<DebugInfo> DI, const std::string &Callee,
             std::vector<std::unique_ptr<ExprAST>> Args)
-    : Callee(Callee), Args(std::move(Args)) {
+    : ExprAST(std::move(DI)), Callee(Callee), Args(std::move(Args)) {
     }
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
 
@@ -313,6 +308,10 @@ class ExprBlockAST : public ExprAST {
 
 public:
 
+    ExprBlockAST(std::unique_ptr<DebugInfo> DI) : ExprAST(std::move(DI)) {}
+    
+    virtual ~ExprBlockAST(){}
+    
     void addExpression(std::unique_ptr<ExprAST> exp) {
         Expressions.push_back(std::move(exp));
     }
@@ -363,9 +362,9 @@ class IfExprAST : public ExprAST {
 
 public:
 
-    IfExprAST(std::unique_ptr<ExprAST> Cond, std::unique_ptr<ExprBlockAST> Then,
+    IfExprAST(std::unique_ptr<DebugInfo> DI, std::unique_ptr<ExprAST> Cond, std::unique_ptr<ExprBlockAST> Then,
             std::unique_ptr<ExprBlockAST> Else)
-    : Cond(std::move(Cond)), Then(std::move(Then)), Else(std::move(Else)) {
+    : ExprAST(std::move(DI)), Cond(std::move(Cond)), Then(std::move(Then)), Else(std::move(Else)) {
     }
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
 
