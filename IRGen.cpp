@@ -47,7 +47,6 @@ static void abort(const char *Str, std::string msg, std::string loc) {
     exit(-1);
 }
 
-
 static void LogError(const char *Str, std::string loc) {
     fprintf(stderr, "Compiler error (code generator): %s -> %s\n", Str, loc.c_str());
 }
@@ -101,7 +100,7 @@ void IRGen::visit(FunctionAST* node) {
 // Internal method for prototype function generation
 
 Function* IRGen::visitFunctionPrototypeImpl(PrototypeAST* node) {
-    
+
     std::vector<Arg>& Args = node->getArgs();
     const std::string& Name = node->getName();
     auto DI = node->getDebugInfo();
@@ -240,6 +239,7 @@ BasicBlock* IRGen::visitExpBlock(std::unique_ptr<ExprBlockAST> block,
         Symbol* retSymb = symbolTable.getSymbol("retvalue");
         Value* retV = retSymb->getMemRef();
         Value* loadRet = Builder->CreateLoad(retV);
+
         Builder->CreateRet(loadRet);
         currentRetBB = nullptr;
     }
@@ -430,9 +430,9 @@ Value* IRGen::visit(BinaryExprAST* node) {
 
 
         case Operation::LT:
-           
+
             if (L->getType() == Type::getDoubleTy(*TheContext)) {
-                 L = Builder->CreateFCmpULT(L, R, "cmptmp");
+                L = Builder->CreateFCmpULT(L, R, "cmptmp");
                 // Convert bool 0/1 to double 0.0 or 1.0
                 return Builder->CreateUIToFP(L, Type::getDoubleTy(*TheContext), "booltmp");
             } else if (L->getType() == Type::getInt64Ty(*TheContext)) {
@@ -501,10 +501,18 @@ Value* IRGen::visit(UnaryExprAST* node) {
 
 void IRGen::visit(ReturnAST* ifexp) {
 
+    auto DI = ifexp->getDebugInfo();
+    // get the parent function for type verification
+    Function* function = currentRetBB->getParent();
+
     // this methos only saves the Value of the expression in the 
     // "retvalue" alloca and jumps to the return block.
     std::unique_ptr<ExprAST> RHS = ifexp->getExpr();
     Value* Expr = RHS->acceptIRGenVisitor(this);
+
+    if(function->getReturnType() != Expr->getType()){
+        abort("Type incompatibility between returned expression and function's return type", DI->getInfo());
+    }
 
     Symbol* retSymb = symbolTable.getSymbol("retvalue");
 
@@ -549,7 +557,7 @@ llvm::Value* IRGen::visit(CallExprAST* node) {
             return nullptr;
     }
     // if is a void function, do not save the return;
-    if(CalleeF->getReturnType() == Type::getVoidTy(*TheContext)){
+    if (CalleeF->getReturnType() == Type::getVoidTy(*TheContext)) {
         Builder->CreateCall(CalleeF, ArgsV);
         return nullptr;
     }
