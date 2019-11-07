@@ -24,20 +24,15 @@ static void abort(std::string str, int line) {
     exit(-1);
 }
 
+
 template <class T>
-std::unique_ptr<T> LogErrorO(const char *Str, int line) {
-    fprintf(stderr, "Compiler error: %s - line %d\n", Str, line);
+static std::unique_ptr<T> LogError(const char *Str, std::string loc) {
+    fprintf(stderr, "Compiler error (parser): %s -> %s\n", Str, loc.c_str());
     return nullptr;
 }
 
-template <class T>
-std::unique_ptr<T> LogErrorM(const char *Str, std::string loc) {
-    fprintf(stderr, "Compiler error: %s - %s\n", Str, loc.c_str());
-    return nullptr;
-}
-
-void LogWarn(const char *Str, int line) {
-    fprintf(stderr, "Compiler warning: %s -line %d\n", Str, line);
+void LogWarn(const char *Str, std::string loc) {
+    fprintf(stderr, "Compiler warning (parser): %s -> %s\n", Str, loc.c_str());
 }
 
 std::unique_ptr<DebugInfo> Parser::genDebugInfo(){
@@ -45,28 +40,6 @@ std::unique_ptr<DebugInfo> Parser::genDebugInfo(){
     return std::make_unique<DebugInfo>(DebugInfo(lexer->GetTokLine(), 0, lexer->getFileName()));
 }
 
-/*
-std::unique_ptr<ExprAST> LogError(const char *Str, int line) {
-    fprintf(stderr, "LogError: %s - line %d\n", Str, line);
-    return nullptr;
-}
-
-std::unique_ptr<PrototypeAST> LogErrorP(const char *Str, int line) {
-    LogError(Str, line);
-    return nullptr;
-}
-
-std::unique_ptr<FunctionAST> LogErrorF(const char *Str, int line) {
-    LogError(Str, line);
-    return nullptr;
-}
-
-
-std::unique_ptr<ExprBlockAST> LogErrorB(const char *Str, int line) {
-    LogError(Str, line);
-    return nullptr;
-}
- */
 void Parser::fail() {
     failed = true;
 }
@@ -136,26 +109,32 @@ std::unique_ptr<PrototypeAST> Parser::ParsePrototype(bool pure) {
     VarType t;
     auto DI = genDebugInfo();
 
-    if (lexer->getCurrentToken() != tok_type)
-        return LogErrorM<PrototypeAST>("Expected return type in prototype",
+    if (lexer->getCurrentToken() != tok_type){
+        fail();
+        return LogError<PrototypeAST>("Expected return type in prototype",
             DI->getInfo());
+    } 
 
     std::string type = lexer->getIdentifierStr();
     t = convertType(type);
     lexer->getNextToken();
 
-    if (lexer->getCurrentToken() != tok_identifier)
-        return LogErrorM<PrototypeAST>("Expected function name in prototype",
+    if (lexer->getCurrentToken() != tok_identifier){
+        fail();
+        return LogError<PrototypeAST>("Expected function name in prototype",
             DI->getInfo());
+    }    
 
     std::string FnName = lexer->getIdentifierStr();
     //std::cout << FnName << std::endl;
     lexer->getNextToken();
 
     //std::cout << lexer->getCurrentToken() << std::endl;
-    if (lexer->getCurrentToken() != '(')
-        return LogErrorM<PrototypeAST>("Expected '(' in prototype",
+    if (lexer->getCurrentToken() != '('){
+        fail();
+        return LogError<PrototypeAST>("Expected '(' in prototype",
             DI->getInfo());
+    }    
 
     // Read the list of argument names.
     std::vector<Arg> ArgNames;
@@ -165,7 +144,8 @@ std::unique_ptr<PrototypeAST> Parser::ParsePrototype(bool pure) {
         // eat type
         lexer->getNextToken();
         if (lexer->getCurrentToken() != tok_identifier) {
-            return LogErrorM<PrototypeAST>("Expected parameter name after type in prototype",
+            fail();
+            return LogError<PrototypeAST>("Expected parameter name after type in prototype",
                     DI->getInfo());
         }
         std::string name = lexer->getIdentifierStr();
@@ -174,7 +154,8 @@ std::unique_ptr<PrototypeAST> Parser::ParsePrototype(bool pure) {
         if (lexer->getCurrentToken() == ',') {
             lexer->getNextToken();
             if (lexer->getCurrentToken() != tok_type) {
-                return LogErrorM<PrototypeAST>("Untermined list of params in prototype",
+                fail();
+                return LogError<PrototypeAST>("Untermined list of params in prototype",
                         DI->getInfo());
             }
         } else {
@@ -182,7 +163,8 @@ std::unique_ptr<PrototypeAST> Parser::ParsePrototype(bool pure) {
         }
     }
     if (lexer->getCurrentToken() != ')') {
-        return LogErrorM<PrototypeAST>("Expected ')' in prototype",
+        fail();
+        return LogError<PrototypeAST>("Expected ')' in prototype",
                 DI->getInfo());
     }
     // success.
@@ -191,14 +173,13 @@ std::unique_ptr<PrototypeAST> Parser::ParsePrototype(bool pure) {
     // pure prototype for trully extern functions
     if (pure) {
         if (lexer->getCurrentToken() != ';') {
-            LogErrorM<PrototypeAST>("Expected ';' in prototype",
+            fail();
+            LogError<PrototypeAST>("Expected ';' in prototype",
                     DI->getInfo());
         }
         lexer->getNextToken();
     }
 
-    //std::cout << "Func name " << FnName << std::endl;
-    //std::cout << "Func args " << ArgNames.size() << std::endl;
     return std::make_unique<PrototypeAST>(std::move(DI), t, FnName, std::move(ArgNames));
 }
 
@@ -211,7 +192,7 @@ std::unique_ptr<ExprBlockAST> Parser::ParseExprBlock() {
 
     if (lexer->getCurrentToken() != '{') {
         fail();
-        return LogErrorM<ExprBlockAST>("Expected { in function body start",
+        return LogError<ExprBlockAST>("Expected { in function body start",
                 DI->getInfo());
 
     }
@@ -220,12 +201,12 @@ std::unique_ptr<ExprBlockAST> Parser::ParseExprBlock() {
     bool unreachable = false;
     while (auto E = ParseExpression()) {
         if (unreachable) {
-            LogWarn("ureachable code", lexer->GetTokLine());
+            LogWarn("ureachable code", DI->getInfo());
         }
         if (E->isSimple()) {
             if (lexer->getCurrentToken() != ';') {
                 fail();
-                return LogErrorM<ExprBlockAST>("Expected ; in expression",
+                return LogError<ExprBlockAST>("Expected ; in expression",
                         DI->getInfo());
             }
             lexer->getNextToken();
@@ -243,7 +224,7 @@ std::unique_ptr<ExprBlockAST> Parser::ParseExprBlock() {
     }
     if (lexer->getCurrentToken() != '}') {
         fail();
-        return LogErrorM<ExprBlockAST>("Expected } in function body termination",
+        return LogError<ExprBlockAST>("Expected } in function body termination",
                 DI->getInfo());
     }
 
@@ -262,7 +243,7 @@ std::unique_ptr<FunctionAST> Parser::ParseDefinition() {
 
     if (lexer->getCurrentToken() != '{') {
         fail();
-        return LogErrorM<FunctionAST>("Expected { in function body start",
+        return LogError<FunctionAST>("Expected { in function body start",
                 DI->getInfo());
     }
     //eat {
@@ -281,12 +262,12 @@ std::unique_ptr<FunctionAST> Parser::ParseDefinition() {
 
     if (!block) {
         fail();
-        return LogErrorM<FunctionAST>("Problem in function parsing", DI->getInfo());
+        return LogError<FunctionAST>("Problem in function parsing", DI->getInfo());
     }
 
     if (block->empty()) {
         fail();
-        return LogErrorM<FunctionAST>("An empty function body is not allowed",
+        return LogError<FunctionAST>("An empty function body is not allowed",
                 DI->getInfo());
     }
 
@@ -320,7 +301,7 @@ std::unique_ptr<ExprAST> Parser::ParsePrimary() {
     switch (lexer->getCurrentToken()) {
         default:
             fail();
-            return LogErrorM<ExprAST>("unknown token when expecting an expression",
+            return LogError<ExprAST>("unknown token when expecting an expression",
                     DI->getInfo());
         case tok_identifier:
             exp = ParseIdentifierExpr();
@@ -355,7 +336,7 @@ std::unique_ptr<ExprAST> Parser::ParseUnaryExpr() {
 
     if (lexer->getOpType() != OperationType::UNARY) {
         fail();
-        return LogErrorM<ExprAST>("Invalid unary operator",
+        return LogError<ExprAST>("Invalid unary operator",
                 DI->getInfo());
     }
     lexer->getNextToken(); //eat unary op;
@@ -403,7 +384,7 @@ std::unique_ptr<ExprAST> Parser::ParseIdentifierExpr() {
 
                 if (lexer->getCurrentToken() != ',') {
                     fail();
-                    return LogErrorM<ExprAST>("Expected ')' or ',' in argument list",
+                    return LogError<ExprAST>("Expected ')' or ',' in argument list",
                             DI->getInfo());
                 }
                 lexer->getNextToken();
@@ -483,7 +464,7 @@ std::unique_ptr<ExprAST> Parser::ParseParenExpr() {
     }
     if (lexer->getCurrentToken() != ')') {
         fail();
-        return LogErrorM<ExprAST>("expected ')'", DI->getInfo());
+        return LogError<ExprAST>("expected ')'", DI->getInfo());
     }
     lexer->getNextToken(); // eat ).
     return V;
@@ -508,7 +489,7 @@ std::unique_ptr<ExprAST> Parser::ParseIfExpr() {
     lexer->getNextToken(); // eat the if.
     if (lexer->getCurrentToken() != '(') {
         fail();
-        return LogErrorM<ExprAST>("expected ( in if condition", DI->getInfo());
+        return LogError<ExprAST>("expected ( in if condition", DI->getInfo());
     }
     lexer->getNextToken();
 
@@ -519,7 +500,7 @@ std::unique_ptr<ExprAST> Parser::ParseIfExpr() {
 
     if (lexer->getCurrentToken() != ')') {
         fail();
-        return LogErrorM<ExprAST>("expected ) in the end of if condition", DI->getInfo());
+        return LogError<ExprAST>("expected ) in the end of if condition", DI->getInfo());
     }
     lexer->getNextToken();
 

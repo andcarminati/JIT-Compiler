@@ -37,9 +37,19 @@
 
 using namespace llvm;
 
-static void abort(std::string str, std::string str2) {
-    std::cout << "Code generator fatal: " << str << str2 << std::endl;
+static void abort(const char *Str, std::string loc) {
+    printf("Code generator fatal: %s -> %s\n", Str, loc.c_str());
     exit(-1);
+}
+
+static void abort(const char *Str, std::string msg, std::string loc) {
+    printf("Code generator fatal: %s (%s) -> %s\n", Str, msg.c_str(), loc.c_str());
+    exit(-1);
+}
+
+
+static void LogError(const char *Str, std::string loc) {
+    fprintf(stderr, "Compiler error (code generator): %s -> %s\n", Str, loc.c_str());
 }
 
 static Type* convertType(VarType t, LLVMContext* context) {
@@ -91,6 +101,7 @@ void IRGen::visit(FunctionAST* node) {
 // Internal method for prototype function generation
 
 Function* IRGen::visitFunctionPrototypeImpl(PrototypeAST* node) {
+    
     std::vector<Arg>& Args = node->getArgs();
     const std::string& Name = node->getName();
     auto DI = node->getDebugInfo();
@@ -293,8 +304,9 @@ void IRGen::visit(IfExprAST* ifexp) {
 
 llvm::Value* IRGen::visit(VariableExprAST* node) {
 
+    auto DI = node->getDebugInfo();
     if (!symbolTable.contains(node->getName())) {
-        abort("Variable not found: ", node->getName());
+        abort("Variable not found", node->getName(), DI->getInfo());
         return nullptr;
     }
 
@@ -304,7 +316,7 @@ llvm::Value* IRGen::visit(VariableExprAST* node) {
     if (symbol->getStorageType() == StorageType::LOCAL) {
         return Builder->CreateLoad(symbol->getMemRef());
     }
-    abort("Not implemented ", "");
+    abort("Not implemented ", DI->getInfo());
 
     return nullptr;
 }
@@ -326,6 +338,7 @@ Value* IRGen::visit(IntegerNumberExprAST* node) {
 
 Value* IRGen::visit(BinaryExprAST* node) {
 
+    auto DI = node->getDebugInfo();
     Operation Op = node->getOp();
     std::unique_ptr<ExprAST> LHS = node->getLHS();
     std::unique_ptr<ExprAST> RHS = node->getRHS();
@@ -337,7 +350,7 @@ Value* IRGen::visit(BinaryExprAST* node) {
         // dynamic_cast for automatic error checking.
         VariableExprAST *LHSE = static_cast<VariableExprAST *> (LHS.get());
         if (!LHSE) {
-            std::cout << "destination of '=' must be a variable\n";
+            LogError("destination of '=' must be a variable", DI->getInfo());
             // return LogErrorV("destination of '=' must be a variable");
             return nullptr;
         }
@@ -350,7 +363,7 @@ Value* IRGen::visit(BinaryExprAST* node) {
         Symbol* symb = symbolTable.getSymbol(LHSE->getName());
 
         if (!symb) {
-            abort("Unknown variable name: ", LHSE->getName());
+            abort("Unknown variable name", LHSE->getName(), DI->getInfo());
             // return LogErrorV("destination of '=' must be a variable");
             return nullptr;
         }
@@ -366,7 +379,7 @@ Value* IRGen::visit(BinaryExprAST* node) {
         return nullptr;
 
     if (L->getType() != R->getType()) {
-        abort("Type incompatibility between operands", "");
+        abort("Type incompatibility between operands", DI->getInfo());
         return nullptr;
     }
 
@@ -377,7 +390,7 @@ Value* IRGen::visit(BinaryExprAST* node) {
             } else if (L->getType() == Type::getInt64Ty(*TheContext)) {
                 return Builder->CreateAdd(L, R, "addtmp");
             } else {
-                abort("Unimplemented operand type", "");
+                abort("Unimplemented operand type", DI->getInfo());
                 return nullptr;
             }
 
@@ -387,7 +400,7 @@ Value* IRGen::visit(BinaryExprAST* node) {
             } else if (L->getType() == Type::getInt64Ty(*TheContext)) {
                 return Builder->CreateSub(L, R, "subtmp");
             } else {
-                abort("Unimplemented operand type", "");
+                abort("Unimplemented operand type", DI->getInfo());
                 return nullptr;
             }
 
@@ -398,7 +411,7 @@ Value* IRGen::visit(BinaryExprAST* node) {
             } else if (L->getType() == Type::getInt64Ty(*TheContext)) {
                 return Builder->CreateMul(L, R, "multmp");
             } else {
-                abort("Unimplemented operand type", "");
+                abort("Unimplemented operand type", DI->getInfo());
                 return nullptr;
             }
 
@@ -411,7 +424,7 @@ Value* IRGen::visit(BinaryExprAST* node) {
                 L = Builder->CreateICmpEQ(L, R, "eqtmp");
                 return L;
             } else {
-                abort("Unimplemented operand type", "");
+                abort("Unimplemented operand type", DI->getInfo());
                 return nullptr;
             }
 
@@ -426,7 +439,7 @@ Value* IRGen::visit(BinaryExprAST* node) {
                 L = Builder->CreateICmpSLT(L, R, "eqtmp");
                 return L;
             } else {
-                abort("Unimplemented operand type", "");
+                abort("Unimplemented operand type", DI->getInfo());
                 return nullptr;
             }
 
@@ -441,6 +454,7 @@ Value* IRGen::visit(BinaryExprAST* node) {
 
 Value* IRGen::visit(UnaryExprAST* node) {
 
+    auto DI = node->getDebugInfo();
     std::unique_ptr<ExprAST> LRHS = node->getLRHS();
     Operation op = node->getOp();
     bool isPrefixed = node->isPrefix();
@@ -448,7 +462,7 @@ Value* IRGen::visit(UnaryExprAST* node) {
 
     VariableExprAST *LHSE = static_cast<VariableExprAST *> (LRHS.get());
     if (!LHSE) {
-        std::cout << "unary operand must be a variable\n";
+        abort("unary operand must be a variable", DI->getInfo());
         // return LogErrorV("destination of '=' must be a variable");
         return nullptr;
     }
@@ -470,7 +484,7 @@ Value* IRGen::visit(UnaryExprAST* node) {
                     APFloat(1.0)), "dectmp");
             break;
         default:
-            abort("Unimplemented unary operator", "");
+            abort("Unimplemented unary operator", DI->getInfo());
             return nullptr;
     }
     Builder->CreateStore(result, sym->getMemRef());
@@ -504,15 +518,16 @@ void IRGen::visit(ReturnAST* ifexp) {
 
 llvm::Value* IRGen::visit(CallExprAST* node) {
     // Look up the name in the global module table.
+    auto DI = node->getDebugInfo();
     Function *CalleeF = TheModule->getFunction(node->getCalee());
     if (!CalleeF) {
-        abort("Unknown function referenced", "");
+        abort("Unknown function referenced", node->getCalee(), DI->getInfo());
         return nullptr;
     }
     std::vector<std::unique_ptr < ExprAST>> Args = node->getArgs();
     // If argument mismatch error.
     if (CalleeF->arg_size() != Args.size()) {
-        abort("Incorrect # arguments passed", "");
+        abort("Incorrect # arguments passed", DI->getInfo());
         return nullptr;
     }
     //check parameter compatibility and construct the vector
@@ -525,7 +540,7 @@ llvm::Value* IRGen::visit(CallExprAST* node) {
 
         //check types
         if (ActualArg.getType() != Arg->getType()) {
-            abort("Type incompatibility between provided and expected arguments", "");
+            abort("Type incompatibility between provided and expected arguments", DI->getInfo());
             return nullptr;
         }
         I++;
