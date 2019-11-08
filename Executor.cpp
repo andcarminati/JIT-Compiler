@@ -36,8 +36,8 @@ void Executor::execute() {
     // Get the symbol's address and cast it to the right type (takes no
     // arguments, returns a double) so we can call it as a native function.
     double (*FP)() = (double (*)())(intptr_t) cantFail(ExprSymbol.getAddress());
-    fprintf(stderr, "Return of the main function %f\n", FP());
-
+    //fprintf(stderr, "Return of the main function %f\n", FP());
+    FP();
     // Delete the anonymous expression module from the JIT.
     //TheJIT->removeModule(H);
 }

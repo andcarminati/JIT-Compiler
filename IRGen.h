@@ -31,6 +31,9 @@
 #include <map>
 #include "AST.h"
 #include "SymbolTable.h"
+#include "LangDefs.h"
+
+class DebugInfo;
 
 class PrimaryAST;
 class PrototypeAST;
@@ -80,6 +83,7 @@ private:
         std::string name, Function* function);
     
     void allocSpaceForParams(Function* function, BasicBlock* BB);
+    llvm::Value*  allocLocalVar(Function* function, std::string& name, VarType type, DebugInfo* DI);
     
 };
 

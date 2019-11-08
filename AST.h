@@ -145,6 +145,14 @@ public:
     std::string& getName() {
         return Name;
     }
+
+    std::unique_ptr<ExprAST> getInitalizer() {
+        return std::move(Initializer);
+    }
+
+    VarType getType() {
+        return Type;
+    }
 };
 
 /// VariableExprAST - Expression class for referencing a variable, like "a".

@@ -1,3 +1,6 @@
+
+#include <stdlib.h>
+
 //    Copyright 2019 Andreu Carminati
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
@@ -199,6 +202,25 @@ void IRGen::allocSpaceForParams(Function* function, BasicBlock* BB) {
 
 }
 
+// Generate alloca for specific var
+
+Value* IRGen::allocLocalVar(Function* function, std::string& name, VarType type, DebugInfo* DI) {
+
+    IRBuilder<> TmpB(&function->getEntryBlock(),
+            function->getEntryBlock().begin());
+
+    AllocaInst* Alloca = TmpB.CreateAlloca(convertType(type, TheContext), 0,
+            name);
+    
+    if(symbolTable.contains(name)){
+        abort("Variable already declared", name, DI->getInfo());
+    }
+
+    symbolTable.insertSymbol(name, StorageType::LOCAL, Alloca);
+
+    return Alloca;
+}
+
 // Private method for expression block code generation.
 
 BasicBlock* IRGen::visitExpBlock(std::unique_ptr<ExprBlockAST> block,
@@ -284,8 +306,8 @@ void IRGen::visit(IfExprAST* ifexp) {
     Builder->SetInsertPoint(parentBB);
 
     Value *CondValue = Condition->acceptIRGenVisitor(this);
-    CondValue = Builder->CreateFCmpONE(CondValue, ConstantFP::get(*TheContext,
-            APFloat(0.0)), "ifcond");
+    //CondValue = Builder->CreateFCmpONE(CondValue, ConstantFP::get(*TheContext,
+    //       APFloat(0.0)), "ifcond");
 
     // if we have an else block/ jump to it
     if (elseBB) {
@@ -419,7 +441,8 @@ Value* IRGen::visit(BinaryExprAST* node) {
             if (L->getType() == Type::getDoubleTy(*TheContext)) {
                 L = Builder->CreateFCmpUEQ(L, R, "eqtmp");
                 // Convert bool 0/1 to double 0.0 or 1.0
-                return Builder->CreateUIToFP(L, Type::getDoubleTy(*TheContext), "booltmp");
+                //return Builder->CreateUIToFP(L, Type::getDoubleTy(*TheContext), "booltmp");
+                return L;
             } else if (L->getType() == Type::getInt64Ty(*TheContext)) {
                 L = Builder->CreateICmpEQ(L, R, "eqtmp");
                 return L;
@@ -434,7 +457,8 @@ Value* IRGen::visit(BinaryExprAST* node) {
             if (L->getType() == Type::getDoubleTy(*TheContext)) {
                 L = Builder->CreateFCmpULT(L, R, "cmptmp");
                 // Convert bool 0/1 to double 0.0 or 1.0
-                return Builder->CreateUIToFP(L, Type::getDoubleTy(*TheContext), "booltmp");
+                //return Builder->CreateUIToFP(L, Type::getDoubleTy(*TheContext), "booltmp");
+                return L;
             } else if (L->getType() == Type::getInt64Ty(*TheContext)) {
                 L = Builder->CreateICmpSLT(L, R, "eqtmp");
                 return L;
@@ -510,7 +534,7 @@ void IRGen::visit(ReturnAST* ifexp) {
     std::unique_ptr<ExprAST> RHS = ifexp->getExpr();
     Value* Expr = RHS->acceptIRGenVisitor(this);
 
-    if(function->getReturnType() != Expr->getType()){
+    if (function->getReturnType() != Expr->getType()) {
         abort("Type incompatibility between returned expression and function's return type", DI->getInfo());
     }
 
@@ -565,7 +589,25 @@ llvm::Value* IRGen::visit(CallExprAST* node) {
 }
 
 // LocalVarDeclarationExprAST overload
-llvm::Value* IRGen::visit(LocalVarDeclarationExprAST* node){
+
+llvm::Value* IRGen::visit(LocalVarDeclarationExprAST* node) {
+    
+    auto DI = node->getDebugInfo();
+    std::string name = node->getName();
+    std::unique_ptr<ExprAST> Exp = node->getInitalizer();
+    VarType type = node->getType();
+    Value* allocated = allocLocalVar(Builder->GetInsertBlock()->getParent(), name, type, DI.get());
+    
+    Value* initializer = Exp->acceptIRGenVisitor(this);
+    
+    if(initializer){
+       if(convertType(type, TheContext) != initializer->getType()){
+            abort("Type incompatibility between variable and its initializer", DI->getInfo());
+       }
+       Builder->CreateStore(initializer, allocated);
+    }
+    
+    
     return nullptr;
 }
 
