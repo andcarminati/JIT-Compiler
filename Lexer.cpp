@@ -88,6 +88,9 @@ int Lexer::getTok() {// gettok - Return the next token from standard input.
         if (IdentifierStr == "none") {
             return tok_type;
         }
+        if (IdentifierStr == "let") {
+            return tok_let;
+        }
         // printf("aqui2: ");
         //std::cout << IdentifierStr << "\n";
         return tok_identifier;
@@ -220,6 +223,6 @@ int Lexer::GetTokLine() {
     return line;
 }
 
-std::string& Lexer::getFileName(){
+std::string& Lexer::getFileName() {
     return FileName;
 }

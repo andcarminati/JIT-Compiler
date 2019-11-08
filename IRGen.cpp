@@ -564,6 +564,11 @@ llvm::Value* IRGen::visit(CallExprAST* node) {
     return Builder->CreateCall(CalleeF, ArgsV, "calltmp");
 }
 
+// LocalVarDeclarationExprAST overload
+llvm::Value* IRGen::visit(LocalVarDeclarationExprAST* node){
+    return nullptr;
+}
+
 // Transfer the pointer out of this object.
 
 std::unique_ptr<Module> IRGen::getModule() {

@@ -33,23 +33,30 @@ class IRGen;
 /// BaseAST - base for all other classes
 
 class BaseAST {
-public:    
-    BaseAST(std::unique_ptr<DebugInfo> DI): DI(std::move(DI)) {}
-    std::unique_ptr<DebugInfo> getDebugInfo(){return std::move(DI);}
-    
-    virtual ~BaseAST(){}
-    
+public:
+
+    BaseAST(std::unique_ptr<DebugInfo> DI) : DI(std::move(DI)) {
+    }
+
+    std::unique_ptr<DebugInfo> getDebugInfo() {
+        return std::move(DI);
+    }
+
+    virtual ~BaseAST() {
+    }
+
 private:
     std::unique_ptr<DebugInfo> DI;
 };
 
 /// ExprAST - Base class for all expression nodes.
 
-class PrimaryAST : public BaseAST{
+class PrimaryAST : public BaseAST {
 public:
-    
-    PrimaryAST(std::unique_ptr<DebugInfo> DI) : BaseAST(std::move(DI)) {}
-    
+
+    PrimaryAST(std::unique_ptr<DebugInfo> DI) : BaseAST(std::move(DI)) {
+    }
+
     virtual ~PrimaryAST() {
     }
 
@@ -60,12 +67,14 @@ public:
 
 /// ExprAST - Base class for all expression nodes.
 
-class ExprAST: public BaseAST {
+class ExprAST : public BaseAST {
 public:
 
-    ExprAST(std::unique_ptr<DebugInfo> DI) : BaseAST(std::move(DI)) {}
-    
-    virtual ~ExprAST() {}
+    ExprAST(std::unique_ptr<DebugInfo> DI) : BaseAST(std::move(DI)) {
+    }
+
+    virtual ~ExprAST() {
+    }
 
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor) {
         printf("Not implemented AST node\n");
@@ -114,7 +123,29 @@ public:
     }
 };
 
+/// LocalVarDeclarationExprAST
 
+class LocalVarDeclarationExprAST : public ExprAST {
+    std::string Name;
+    std::unique_ptr<ExprAST> Initializer;
+    VarType Type;
+public:
+
+    LocalVarDeclarationExprAST(std::unique_ptr<DebugInfo> DI,
+            const std::string &Name,
+            std::unique_ptr<ExprAST> Initializer,
+            VarType Type) : ExprAST(std::move(DI)), Name(Name), Initializer(std::move(Initializer)), Type(Type) {
+    }
+
+    virtual ~LocalVarDeclarationExprAST() {
+    }
+
+    virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
+
+    std::string& getName() {
+        return Name;
+    }
+};
 
 /// VariableExprAST - Expression class for referencing a variable, like "a".
 
@@ -125,9 +156,10 @@ public:
 
     VariableExprAST(std::unique_ptr<DebugInfo> DI, const std::string &Name) : ExprAST(std::move(DI)), Name(Name) {
     }
-    
-    virtual ~VariableExprAST(){}
-    
+
+    virtual ~VariableExprAST() {
+    }
+
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
 
     std::string& getName() {
@@ -214,9 +246,9 @@ public:
 
     ReturnAST(std::unique_ptr<DebugInfo> DI, std::unique_ptr<ExprAST> RHS) : ExprAST(std::move(DI)), RHS(std::move(RHS)) {
     }
-    
+
     //virtual ~ReturnAST(){}
-    
+
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
 
     virtual bool isUncondTransfer() {
@@ -308,10 +340,12 @@ class ExprBlockAST : public ExprAST {
 
 public:
 
-    ExprBlockAST(std::unique_ptr<DebugInfo> DI) : ExprAST(std::move(DI)) {}
-    
-    virtual ~ExprBlockAST(){}
-    
+    ExprBlockAST(std::unique_ptr<DebugInfo> DI) : ExprAST(std::move(DI)) {
+    }
+
+    virtual ~ExprBlockAST() {
+    }
+
     void addExpression(std::unique_ptr<ExprAST> exp) {
         Expressions.push_back(std::move(exp));
     }

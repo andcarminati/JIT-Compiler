@@ -1,0 +1,9 @@
+
+
+
+function real main() {
+
+    let real a = 2;
+    #let integer b = 4;
+    return 5.0;
+}

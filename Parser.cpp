@@ -24,7 +24,6 @@ static void abort(std::string str, int line) {
     exit(-1);
 }
 
-
 template <class T>
 static std::unique_ptr<T> LogError(const char *Str, std::string loc) {
     fprintf(stderr, "Compiler error (parser): %s -> %s\n", Str, loc.c_str());
@@ -35,8 +34,8 @@ void LogWarn(const char *Str, std::string loc) {
     fprintf(stderr, "Compiler warning (parser): %s -> %s\n", Str, loc.c_str());
 }
 
-std::unique_ptr<DebugInfo> Parser::genDebugInfo(){
-    
+std::unique_ptr<DebugInfo> Parser::genDebugInfo() {
+
     return std::make_unique<DebugInfo>(DebugInfo(lexer->GetTokLine(), 0, lexer->getFileName()));
 }
 
@@ -109,32 +108,32 @@ std::unique_ptr<PrototypeAST> Parser::ParsePrototype(bool pure) {
     VarType t;
     auto DI = genDebugInfo();
 
-    if (lexer->getCurrentToken() != tok_type){
+    if (lexer->getCurrentToken() != tok_type) {
         fail();
         return LogError<PrototypeAST>("Expected return type in prototype",
-            DI->getInfo());
-    } 
+                DI->getInfo());
+    }
 
     std::string type = lexer->getIdentifierStr();
     t = convertType(type);
     lexer->getNextToken();
 
-    if (lexer->getCurrentToken() != tok_identifier){
+    if (lexer->getCurrentToken() != tok_identifier) {
         fail();
         return LogError<PrototypeAST>("Expected function name in prototype",
-            DI->getInfo());
-    }    
+                DI->getInfo());
+    }
 
     std::string FnName = lexer->getIdentifierStr();
     //std::cout << FnName << std::endl;
     lexer->getNextToken();
 
     //std::cout << lexer->getCurrentToken() << std::endl;
-    if (lexer->getCurrentToken() != '('){
+    if (lexer->getCurrentToken() != '(') {
         fail();
         return LogError<PrototypeAST>("Expected '(' in prototype",
-            DI->getInfo());
-    }    
+                DI->getInfo());
+    }
 
     // Read the list of argument names.
     std::vector<Arg> ArgNames;
@@ -186,14 +185,14 @@ std::unique_ptr<PrototypeAST> Parser::ParsePrototype(bool pure) {
 /// block of expressions {}
 
 std::unique_ptr<ExprBlockAST> Parser::ParseExprBlock() {
-    
+
     auto DI = genDebugInfo();
     std::unique_ptr<ExprBlockAST> block = std::make_unique<ExprBlockAST>(std::move(DI));
 
     if (lexer->getCurrentToken() != '{') {
         fail();
         return LogError<ExprBlockAST>("Expected { in function body start",
-                DI->getInfo());
+                block->getDebugInfo()->getInfo());
 
     }
     //eat {
@@ -201,13 +200,13 @@ std::unique_ptr<ExprBlockAST> Parser::ParseExprBlock() {
     bool unreachable = false;
     while (auto E = ParseExpression()) {
         if (unreachable) {
-            LogWarn("ureachable code", DI->getInfo());
+            LogWarn("ureachable code", block->getDebugInfo()->getInfo());
         }
         if (E->isSimple()) {
             if (lexer->getCurrentToken() != ';') {
                 fail();
                 return LogError<ExprBlockAST>("Expected ; in expression",
-                        DI->getInfo());
+                        block->getDebugInfo()->getInfo());
             }
             lexer->getNextToken();
         }
@@ -225,7 +224,7 @@ std::unique_ptr<ExprBlockAST> Parser::ParseExprBlock() {
     if (lexer->getCurrentToken() != '}') {
         fail();
         return LogError<ExprBlockAST>("Expected } in function body termination",
-                DI->getInfo());
+                block->getDebugInfo()->getInfo());
     }
 
     lexer->getNextToken();
@@ -324,6 +323,9 @@ std::unique_ptr<ExprAST> Parser::ParsePrimary() {
         case tok_operator:
             exp = ParseUnaryExpr();
             break;
+        case tok_let:
+            exp = ParseLocalDeclarationExpr();
+            break;
             //exp = 
     }
     return exp;
@@ -352,7 +354,7 @@ std::unique_ptr<ExprAST> Parser::ParseUnaryExpr() {
 ///   ::= identifier '(' expression* ')'
 
 std::unique_ptr<ExprAST> Parser::ParseIdentifierExpr() {
-    
+
     auto DI = genDebugInfo();
     std::string IdName = lexer->getIdentifierStr();
     std::unique_ptr<ExprAST> exp;
@@ -471,7 +473,7 @@ std::unique_ptr<ExprAST> Parser::ParseParenExpr() {
 }
 
 std::unique_ptr<ExprAST> Parser::ParseReturnExpr() {
-    
+
     auto DI = genDebugInfo();
     lexer->getNextToken(); // eat 'return'
     auto V = ParseExpression();
@@ -524,4 +526,37 @@ std::unique_ptr<ExprAST> Parser::ParseIfExpr() {
     //lexer->getNextToken();
     return std::make_unique<IfExprAST>(std::move(DI), std::move(Cond), std::move(Then),
             std::move(Else));
+}
+
+std::unique_ptr<ExprAST> Parser::ParseLocalDeclarationExpr() {
+
+    auto DI = genDebugInfo();
+    std::unique_ptr<ExprAST> exp;
+    lexer->getNextToken(); // eat the let.
+
+    if (lexer->getCurrentToken() != tok_type) {
+        fail();
+        return LogError<LocalVarDeclarationExprAST>("Expected type in let sentence",
+                DI->getInfo());
+    }
+
+    std::string typeStr = lexer->getIdentifierStr();
+    VarType type = convertType(typeStr);
+
+    lexer->getNextToken(); // eat type
+    if (lexer->getCurrentToken() != tok_identifier) {
+        fail();
+        return LogError<LocalVarDeclarationExprAST>("Expected variable name in let sentence",
+                DI->getInfo());
+    }
+
+    std::string Name = lexer->getIdentifierStr();
+    lexer->getNextToken(); // eat identifier
+
+    if (lexer->getCurrentToken() == tok_operator && lexer->getOperation() == Operation::ASSIGN) {
+        lexer->getNextToken(); // eat =
+        exp = ParsePrimary();
+    }
+
+    return std::make_unique<LocalVarDeclarationExprAST>(std::move(DI), Name, std::move(exp), type);
 }
