@@ -1,4 +1,7 @@
 
+#include "AST.h"
+
+
 #include <stdlib.h>
 
 //    Copyright 2019 Andreu Carminati
@@ -168,7 +171,7 @@ Function* IRGen::visitFunctionImpl(FunctionAST* node) {
     //if(!lastBB->getTerminator()){
     //    abort("Last return statement is expected at the end function", Name, DI->getInfo());
     //}
-    
+
     return TheFunction;
 }
 
@@ -190,11 +193,13 @@ void IRGen::allocSpaceForParams(Function* function, BasicBlock* BB) {
         allocas.push_back(Alloca);
     }
 
-    // create Alloca for return value;
-    AllocaInst* Alloca = TmpB.CreateAlloca(function->getReturnType(), 0,
-            "retvalue");
+    // create Alloca for return value if necessary;
+    if (function->getReturnType() != Type::getVoidTy(*TheContext)) {
+        AllocaInst* Alloca = TmpB.CreateAlloca(function->getReturnType(), 0,
+                "retvalue");
 
-    symbolTable.insertSymbol("retvalue", StorageType::LOCAL, Alloca);
+        symbolTable.insertSymbol("retvalue", StorageType::LOCAL, Alloca);
+    }
 
     // Store params in the allocas
     for (auto &Arg : function->args()) {
@@ -217,8 +222,8 @@ Value* IRGen::allocLocalVar(Function* function, std::string& name, VarType type,
 
     AllocaInst* Alloca = TmpB.CreateAlloca(convertType(type, TheContext), 0,
             name);
-    
-    if(symbolTable.contains(name)){
+
+    if (symbolTable.contains(name)) {
         abort("Variable already declared", name, DI->getInfo());
     }
 
@@ -264,11 +269,18 @@ BasicBlock* IRGen::visitExpBlock(std::unique_ptr<ExprBlockAST> block,
         // create the final return statement.
         currentRetBB->moveAfter(Builder->GetInsertBlock());
         Builder->SetInsertPoint(currentRetBB);
-        Symbol* retSymb = symbolTable.getSymbol("retvalue");
-        Value* retV = retSymb->getMemRef();
-        Value* loadRet = Builder->CreateLoad(retV);
 
-        Builder->CreateRet(loadRet);
+        // only return a value if a function has a returnn type diferent from void
+        if (function->getReturnType() == Type::getVoidTy(*TheContext)) {
+            Builder->CreateRetVoid();
+        } else {
+            Symbol* retSymb = symbolTable.getSymbol("retvalue");
+            Value* retV = retSymb->getMemRef();
+            Value* loadRet = Builder->CreateLoad(retV);
+
+            Builder->CreateRet(loadRet);
+        }
+
         currentRetBB = nullptr;
     }
 
@@ -320,18 +332,18 @@ void IRGen::visit(IfExprAST* ifexp) {
         Builder->CreateCondBr(CondValue, thenBB, elseBB);
         Builder->SetInsertPoint(elseBB);
         // ensure predecessor/sucessor relation
-        Instruction* last = elseBB->getTerminator(); 
-        
-        if(!last){
-             Builder->CreateBr(contBB);
+        Instruction* last = elseBB->getTerminator();
+
+        if (!last) {
+            Builder->CreateBr(contBB);
         }
-        
+
     } else {
         Builder->CreateCondBr(CondValue, thenBB, contBB);
     }
-    
+
     Builder->SetInsertPoint(contBB);
-    
+
     // NOTE: phi nodes will appear here after mem2reg pass.
 }
 
@@ -539,21 +551,28 @@ Value* IRGen::visit(UnaryExprAST* node) {
 void IRGen::visit(ReturnAST* ifexp) {
 
     auto DI = ifexp->getDebugInfo();
+    std::unique_ptr<ExprAST> RHS = ifexp->getExpr();
     // get the parent function for type verification
     Function* function = currentRetBB->getParent();
 
-    // this methos only saves the Value of the expression in the 
-    // "retvalue" alloca and jumps to the return block.
-    std::unique_ptr<ExprAST> RHS = ifexp->getExpr();
-    Value* Expr = RHS->acceptIRGenVisitor(this);
+    /// we have a void return
+    if (function->getReturnType() == Type::getVoidTy(*TheContext)) {
+        if (RHS) {
+            abort("Void functions cannot return a value", DI->getInfo());
+        }
+    } else {
+        // for non void functions this method only saves the Value of the expression in the 
+        // "retvalue" alloca and jumps to the return block.
+        Value* Expr = RHS->acceptIRGenVisitor(this);
 
-    if (function->getReturnType() != Expr->getType()) {
-        abort("Type incompatibility between returned expression and function's return type", DI->getInfo());
+        if (function->getReturnType() != Expr->getType()) {
+            abort("Type incompatibility between returned expression and function's return type", DI->getInfo());
+        }
+
+        Symbol* retSymb = symbolTable.getSymbol("retvalue");
+        Builder->CreateStore(Expr, retSymb->getMemRef());
     }
 
-    Symbol* retSymb = symbolTable.getSymbol("retvalue");
-
-    Builder->CreateStore(Expr, retSymb->getMemRef());
     // the usage of the "currentBB" is quite ugly, must be reworked in
     // the future.
     Builder->CreateBr(currentRetBB);
@@ -604,23 +623,23 @@ llvm::Value* IRGen::visit(CallExprAST* node) {
 // LocalVarDeclarationExprAST overload
 
 llvm::Value* IRGen::visit(LocalVarDeclarationExprAST* node) {
-    
+
     auto DI = node->getDebugInfo();
     std::string name = node->getName();
     std::unique_ptr<ExprAST> Exp = node->getInitalizer();
     VarType type = node->getType();
     Value* allocated = allocLocalVar(Builder->GetInsertBlock()->getParent(), name, type, DI.get());
-    
+
     Value* initializer = Exp->acceptIRGenVisitor(this);
-    
-    if(initializer){
-       if(convertType(type, TheContext) != initializer->getType()){
+
+    if (initializer) {
+        if (convertType(type, TheContext) != initializer->getType()) {
             abort("Type incompatibility between variable and its initializer", DI->getInfo());
-       }
-       Builder->CreateStore(initializer, allocated);
+        }
+        Builder->CreateStore(initializer, allocated);
     }
-    
-    
+
+
     return nullptr;
 }
 

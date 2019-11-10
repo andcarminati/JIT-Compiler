@@ -478,10 +478,16 @@ std::unique_ptr<ExprAST> Parser::ParseParenExpr() {
 std::unique_ptr<ExprAST> Parser::ParseReturnExpr() {
 
     auto DI = genDebugInfo();
+    std::unique_ptr<ExprAST> V;
     lexer->getNextToken(); // eat 'return'
-    auto V = ParseExpression();
-    if (!V) {
-        return nullptr;
+    if (lexer->getCurrentToken() != ';') {
+        V = ParseExpression();
+        if (!V) {
+            return nullptr;
+        }
+        //return std::make_unique<ReturnAST>(std::move(DI), std::move(V));
+    } else {
+        V = nullptr;
     }
     return std::make_unique<ReturnAST>(std::move(DI), std::move(V));
 }
