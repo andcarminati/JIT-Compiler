@@ -563,6 +563,10 @@ void IRGen::visit(ReturnAST* ifexp) {
     } else {
         // for non void functions this method only saves the Value of the expression in the 
         // "retvalue" alloca and jumps to the return block.
+        if(!RHS){
+            abort("A non void function must return a value", DI->getInfo());
+        }
+        
         Value* Expr = RHS->acceptIRGenVisitor(this);
 
         if (function->getReturnType() != Expr->getType()) {
