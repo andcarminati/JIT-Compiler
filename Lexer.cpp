@@ -53,13 +53,19 @@ int Lexer::getTok() {// gettok - Return the next token from standard input.
     while (isspace(LastChar)) {
         if (LastChar == '\n') {
             line++;
+            col = 1;
+        } else {
+            col++;
         }
         LastChar = file->get();
     }
+    tokCol = col;
     if (isalpha(LastChar)) { // identifier: [a-zA-Z][a-zA-Z0-9]*
         IdentifierStr = LastChar;
-        while (isalnum((LastChar = file->get())))
+        while (isalnum((LastChar = file->get()))) {
+            col++;
             IdentifierStr += LastChar;
+        }
 
         if (IdentifierStr == "function")
             return tok_function;
@@ -101,6 +107,7 @@ int Lexer::getTok() {// gettok - Return the next token from standard input.
         do {
             NumStr += LastChar;
             LastChar = file->get();
+            col++;
         } while (isdigit(LastChar) || LastChar == '.');
 
         std::size_t found = NumStr.find('.');
@@ -116,9 +123,11 @@ int Lexer::getTok() {// gettok - Return the next token from standard input.
 
     if (LastChar == '#') {
         // Comment until end of line.
-        do
-            LastChar = file->get(); while (LastChar != EOF && LastChar != '\n' && LastChar != '\r');
-
+        do {
+            LastChar = file->get();
+        } while (LastChar != EOF && LastChar != '\n' && LastChar != '\r');
+        line++;
+        col = 1;
         if (LastChar != EOF)
             return getTok();
     }
@@ -130,6 +139,7 @@ int Lexer::getTok() {// gettok - Return the next token from standard input.
     // Otherwise, just return the character as its ascii value.
     int ThisChar = LastChar;
     LastChar = file->get();
+    col++;
     CurrOperation = Operation::UNKNOWN;
     CurrOpType = OperationType::BINARY;
     switch (ThisChar) {
@@ -137,6 +147,7 @@ int Lexer::getTok() {// gettok - Return the next token from standard input.
         {
             if (LastChar == '=') {
                 LastChar = file->get();
+                col++;
                 CurrOperation = Operation::EQ;
             } else {
                 CurrOperation = Operation::ASSIGN;
@@ -152,6 +163,7 @@ int Lexer::getTok() {// gettok - Return the next token from standard input.
         {
             if (LastChar == '+') {
                 LastChar = file->get();
+                col++;
                 CurrOperation = Operation::INC;
                 CurrOpType = OperationType::UNARY;
             } else {
@@ -163,6 +175,7 @@ int Lexer::getTok() {// gettok - Return the next token from standard input.
         {
             if (LastChar == '-') {
                 LastChar = file->get();
+                col++;
                 CurrOperation = Operation::DEC;
                 CurrOpType = OperationType::UNARY;
             } else {
@@ -221,6 +234,10 @@ int Lexer::GetTokPrecedence() {
 
 int Lexer::GetTokLine() {
     return line;
+}
+
+int Lexer::GetTokCol(){
+    return tokCol;
 }
 
 std::string& Lexer::getFileName() {

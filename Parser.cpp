@@ -36,7 +36,7 @@ void LogWarn(const char *Str, std::string loc) {
 
 std::unique_ptr<DebugInfo> Parser::genDebugInfo() {
 
-    return std::make_unique<DebugInfo>(DebugInfo(lexer->GetTokLine(), 0, lexer->getFileName()));
+    return std::make_unique<DebugInfo>(DebugInfo(lexer->GetTokLine(), lexer->GetTokCol(), lexer->getFileName()));
 }
 
 void Parser::fail() {

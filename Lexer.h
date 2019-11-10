@@ -81,12 +81,15 @@ public:
     double getNumValInteger();
     int GetTokPrecedence();
     int GetTokLine();
+    int GetTokCol();
     std::string& getFileName();
 
 private:
     int CurTok = ';';
     int LastChar = ' ';
     int line = 1;
+    int col = 1;
+    int tokCol = 1;
     std::map<Operation, int> BinopPrecedence;
     std::unique_ptr<std::ifstream> file;
     std::string IdentifierStr; // Filled in if tok_identifier
