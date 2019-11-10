@@ -156,13 +156,19 @@ Function* IRGen::visitFunctionImpl(FunctionAST* node) {
 
     if (!TheFunction->empty()) {
         //rever
-        std::cout << "Function already defined: " << DI->getInfo() << std::endl;
-        return nullptr;
+        abort("Function already defined", Name, DI->getInfo());
     }
 
     // Create a the first basic block and generate code.
     BasicBlock *BB = visitExpBlock(std::move(node->getBody()), "entry", TheFunction);
 
+    //Check for return
+    //BasicBlock* lastBB = &TheFunction->back();
+    //lastBB->print(errs());
+    //if(!lastBB->getTerminator()){
+    //    abort("Last return statement is expected at the end function", Name, DI->getInfo());
+    //}
+    
     return TheFunction;
 }
 
@@ -314,11 +320,18 @@ void IRGen::visit(IfExprAST* ifexp) {
         Builder->CreateCondBr(CondValue, thenBB, elseBB);
         Builder->SetInsertPoint(elseBB);
         // ensure predecessor/sucessor relation
-        Builder->CreateBr(contBB);
+        Instruction* last = elseBB->getTerminator(); 
+        
+        if(!last){
+             Builder->CreateBr(contBB);
+        }
+        
     } else {
         Builder->CreateCondBr(CondValue, thenBB, contBB);
     }
+    
     Builder->SetInsertPoint(contBB);
+    
     // NOTE: phi nodes will appear here after mem2reg pass.
 }
 

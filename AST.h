@@ -367,6 +367,14 @@ public:
         Expressions.pop_front();
         return ret;
     }
+    
+    bool hasReturn(){
+        ReturnAST *ret = dynamic_cast<ReturnAST *> (Expressions.back().get());
+        if (!ret) {
+            return false;
+        }
+        return true;
+    }
 };
 
 /// FunctionAST - This class represents a function definition itself.

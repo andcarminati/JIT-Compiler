@@ -245,18 +245,7 @@ std::unique_ptr<FunctionAST> Parser::ParseDefinition() {
         return LogError<FunctionAST>("Expected { in function body start",
                 DI->getInfo());
     }
-    //eat {
-    //lexer->getNextToken();
 
-    //if (auto E = ParseExpression()) {
-    //   if (lexer->getCurrentToken() != '}') {
-    //       printf("%c\n", lexer->getCurrentToken());
-    //         return LogErrorF("Expected } in function body termination", lexer->GetTokLine());
-    //     }
-    //eat }
-    //      lexer->getNextToken();
-    //     return std::make_unique<FunctionAST>(std::move(Proto), std::move(E));
-    // }
     std::unique_ptr<ExprBlockAST> block = ParseExprBlock();
 
     if (!block) {
@@ -268,6 +257,20 @@ std::unique_ptr<FunctionAST> Parser::ParseDefinition() {
         fail();
         return LogError<FunctionAST>("An empty function body is not allowed",
                 DI->getInfo());
+    }
+
+    /// verify return
+    if (!block->hasReturn()) {
+
+        if (Proto->getReturnType() == VarType::NONE) {
+            // force an empty return if we don't hava one
+            auto DII = genDebugInfo();
+            block->addExpression(std::make_unique<ReturnAST>(std::move(DII), nullptr));
+        } else {
+            fail();
+            return LogError<FunctionAST>("Function without return as last sentence",
+                    DI->getInfo());
+        }
     }
 
     return std::make_unique<FunctionAST>(std::move(DI), std::move(Proto), std::move(block));
@@ -555,7 +558,7 @@ std::unique_ptr<ExprAST> Parser::ParseLocalDeclarationExpr() {
 
     if (lexer->getCurrentToken() == tok_operator && lexer->getOperation() == Operation::ASSIGN) {
         lexer->getNextToken(); // eat =
-        exp = ParsePrimary();
+        exp = ParseExpression();
     }
 
     return std::make_unique<LocalVarDeclarationExprAST>(std::move(DI), Name, std::move(exp), type);
