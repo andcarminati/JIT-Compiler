@@ -367,8 +367,8 @@ public:
         Expressions.pop_front();
         return ret;
     }
-    
-    bool hasReturn(){
+
+    bool hasReturn() {
         ReturnAST *ret = dynamic_cast<ReturnAST *> (Expressions.back().get());
         if (!ret) {
             return false;
@@ -432,6 +432,28 @@ public:
 
     std::unique_ptr<ExprAST> getCondition() {
         return std::move(Cond);
+    }
+};
+
+/// ForExprAST - Expression class for for/in.
+
+class ForExprAST : public ExprAST {
+    std::unique_ptr<ExprAST> Start, End, Step;
+    std::unique_ptr<ExprBlockAST> Body;
+
+public:
+
+    ForExprAST(std::unique_ptr<DebugInfo> DI, std::unique_ptr<ExprAST> Start,
+            std::unique_ptr<ExprAST> End, std::unique_ptr<ExprAST> Step,
+            std::unique_ptr<ExprBlockAST> Body)
+    : ExprAST(std::move(DI)), Start(std::move(Start)), End(std::move(End)),
+    Step(std::move(Step)), Body(std::move(Body)) {
+    }
+
+    virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
+
+    virtual bool isSimple() {
+        return false;
     }
 };
 

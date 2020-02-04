@@ -58,8 +58,11 @@ llvm::Value* CallExprAST::acceptIRGenVisitor(IRGen* visitor){
     return visitor->visit(this);
 }
 
-
 llvm::Value* LocalVarDeclarationExprAST::acceptIRGenVisitor(IRGen* visitor){
+    return visitor->visit(this);
+}
+
+llvm::Value* ForExprAST::acceptIRGenVisitor(IRGen* visitor){
     return visitor->visit(this);
 }
 

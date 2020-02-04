@@ -48,6 +48,7 @@ class ReturnAST;
 class CallExprAST;
 class UnaryExprAST;
 class LocalVarDeclarationExprAST;
+class ForExprAST;
 
 using namespace llvm;
 
@@ -67,6 +68,7 @@ public:
     llvm::Value* visit(UnaryExprAST* node);
     llvm::Value* visit(CallExprAST* node);
     llvm::Value* visit(LocalVarDeclarationExprAST* node);
+    llvm::Value* visit(ForExprAST* node);
     std::unique_ptr<Module> getModule();
     
 private:

@@ -7,11 +7,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/andreu/NetBeansProjects/Interpreter/AST.h</file>
-            <file>file:/home/andreu/NetBeansProjects/Interpreter/Parser.h</file>
+            <file>file:/home/andreu/NetBeansProjects/Interpreter/DebugInfo.h</file>
             <file>file:/home/andreu/NetBeansProjects/Interpreter/Lexer.cpp</file>
+            <file>file:/home/andreu/NetBeansProjects/Interpreter/Runtime.cpp</file>
+            <file>file:/home/andreu/NetBeansProjects/Interpreter/Optimizer.cpp</file>
             <file>file:/home/andreu/NetBeansProjects/Interpreter/Parser.cpp</file>
-            <file>file:/home/andreu/NetBeansProjects/Interpreter/main.cpp</file>
+            <file>file:/home/andreu/NetBeansProjects/Interpreter/Executor.cpp</file>
             <file>file:/home/andreu/NetBeansProjects/Interpreter/IRGen.cpp</file>
         </group>
     </open-files>

@@ -647,6 +647,14 @@ llvm::Value* IRGen::visit(LocalVarDeclarationExprAST* node) {
     return nullptr;
 }
 
+// ForExprAST overload
+
+llvm::Value* IRGen::visit(ForExprAST* node) {
+
+    return nullptr;
+}
+
+
 // Transfer the pointer out of this object.
 
 std::unique_ptr<Module> IRGen::getModule() {
