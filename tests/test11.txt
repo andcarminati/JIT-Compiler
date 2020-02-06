@@ -1,0 +1,15 @@
+extern integer printinteger(integer v);
+extern real printreal(real v);
+
+
+function real main() {
+
+    let integer b = 4;
+    let integer c = 5;
+    
+    for(let integer i = 0; i < 10; i++){}
+    
+    printinteger(c);
+    
+    return 5.0;
+}

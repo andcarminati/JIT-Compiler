@@ -46,6 +46,7 @@ private:
     std::unique_ptr<ExprAST> ParseReturnExpr();
     std::unique_ptr<ExprBlockAST> ParseExprBlock();
     std::unique_ptr<ExprAST> ParseIfExpr();
+    std::unique_ptr<ExprAST> ParseForExpr();
     std::unique_ptr<ExprAST> ParseUnaryExpr();
     std::unique_ptr<ExprAST> ParseLocalDeclarationExpr();
   

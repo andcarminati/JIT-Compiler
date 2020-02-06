@@ -71,13 +71,13 @@ int main(int argc, char** argv) {
     } 
     
     //auto file = std::make_unique<std::ifstream>(std::ifstream("tests/testif.txt"));
-    auto file = std::make_unique<std::ifstream>(std::ifstream("tests/test10.txt"));
+    auto file = std::make_unique<std::ifstream>(std::ifstream("tests/test11.txt"));
     
     if(!file->good()){
         std::cout << "Cannot open the specified file!" << std::endl;
         exit(-1);
     }
-    auto lexer = std::make_unique<Lexer>(Lexer(std::move(file), "tests/test10.txt"));
+    auto lexer = std::make_unique<Lexer>(Lexer(std::move(file), "tests/test11.txt"));
     auto parser = std::make_shared<Parser>(Parser(std::move(lexer)));
     
     Driver(parser);

@@ -63,7 +63,7 @@ enum Token {
     tok_integer = -18,
             
     // variable declaration
-    tok_let = -19        
+    tok_let = -19
 };
 
 class Lexer {
