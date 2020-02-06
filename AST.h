@@ -438,16 +438,16 @@ public:
 /// ForExprAST - Expression class for for/in.
 
 class ForExprAST : public ExprAST {
-    std::unique_ptr<ExprAST> Start, End, Step;
+    std::unique_ptr<ExprAST> Start, End, Cond;
     std::unique_ptr<ExprBlockAST> Body;
 
 public:
 
     ForExprAST(std::unique_ptr<DebugInfo> DI, std::unique_ptr<ExprAST> Start,
-            std::unique_ptr<ExprAST> End, std::unique_ptr<ExprAST> Step,
+            std::unique_ptr<ExprAST> End, std::unique_ptr<ExprAST> Cond,
             std::unique_ptr<ExprBlockAST> Body)
     : ExprAST(std::move(DI)), Start(std::move(Start)), End(std::move(End)),
-    Step(std::move(Step)), Body(std::move(Body)) {
+    Cond(std::move(Cond)), Body(std::move(Body)) {
     }
 
     virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
@@ -455,6 +455,23 @@ public:
     virtual bool isSimple() {
         return false;
     }
+
+    std::unique_ptr<ExprAST> getStart() {
+        return std::move(Start);
+    }
+
+    std::unique_ptr<ExprAST> getEnd() {
+        return std::move(End);
+    }
+
+    std::unique_ptr<ExprAST> getCond() {
+        return std::move(Cond);
+    }
+
+    std::unique_ptr<ExprBlockAST> getBody() {
+        return std::move(Body);
+    }
+
 };
 
 

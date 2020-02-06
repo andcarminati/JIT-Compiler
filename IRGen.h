@@ -61,6 +61,7 @@ public:
     void visit(FunctionAST* node);
     void visit(IfExprAST* ifexp);
     void visit(ReturnAST* ifexp);
+    void visit(ForExprAST* node);
     llvm::Value* visit(VariableExprAST* node);
     llvm::Value* visit(RealNumberExprAST* node);
     llvm::Value* visit(IntegerNumberExprAST* node);
@@ -68,7 +69,6 @@ public:
     llvm::Value* visit(UnaryExprAST* node);
     llvm::Value* visit(CallExprAST* node);
     llvm::Value* visit(LocalVarDeclarationExprAST* node);
-    llvm::Value* visit(ForExprAST* node);
     std::unique_ptr<Module> getModule();
     
 private:

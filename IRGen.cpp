@@ -525,12 +525,22 @@ Value* IRGen::visit(UnaryExprAST* node) {
 
     switch (op) {
         case Operation::INC:
-            result = Builder->CreateFAdd(var, ConstantFP::get(*TheContext,
-                    APFloat(1.0)), "inctmp");
+            if (var->getType() == Type::getDoubleTy(*TheContext)) {
+                result = Builder->CreateFAdd(var, ConstantFP::get(*TheContext,
+                        APFloat(1.0)), "inctmp");
+            } else {
+                result = Builder->CreateAdd(var,ConstantInt::get(*TheContext, APSInt::get(1)), "inctmp");
+            }
+
             break;
         case Operation::DEC:
-            result = Builder->CreateFSub(var, ConstantFP::get(*TheContext,
+            if (var->getType() == Type::getDoubleTy(*TheContext)) {
+                            result = Builder->CreateFSub(var, ConstantFP::get(*TheContext,
                     APFloat(1.0)), "dectmp");
+            } else{
+                result = Builder->CreateSub(var,ConstantInt::get(*TheContext, APSInt::get(1)), "inctmp");
+            }
+
             break;
         default:
             abort("Unimplemented unary operator", DI->getInfo());
@@ -563,10 +573,10 @@ void IRGen::visit(ReturnAST* ifexp) {
     } else {
         // for non void functions this method only saves the Value of the expression in the 
         // "retvalue" alloca and jumps to the return block.
-        if(!RHS){
+        if (!RHS) {
             abort("A non void function must return a value", DI->getInfo());
         }
-        
+
         Value* Expr = RHS->acceptIRGenVisitor(this);
 
         if (function->getReturnType() != Expr->getType()) {
@@ -649,9 +659,81 @@ llvm::Value* IRGen::visit(LocalVarDeclarationExprAST* node) {
 
 // ForExprAST overload
 
-llvm::Value* IRGen::visit(ForExprAST* node) {
+void IRGen::visit(ForExprAST* forExpr) {
 
-    return nullptr;
+    BasicBlock* parentBB = Builder->GetInsertBlock();
+    BasicBlock* BodyBB = nullptr;
+    BasicBlock* HeaderBB = nullptr;
+    BasicBlock* ContBB = nullptr;
+
+    Function* function = parentBB->getParent();
+    std::unique_ptr<ExprBlockAST> Block = forExpr->getBody();
+    std::unique_ptr<ExprAST> Start = forExpr->getStart();
+    std::unique_ptr<ExprAST> Cond = forExpr->getCond();
+    std::unique_ptr<ExprAST> End = forExpr->getEnd();
+
+    // scope for declared variables
+    symbolTable.push_scope();
+
+    // for initialization
+    Value* StartValue = Start->acceptIRGenVisitor(this);
+
+    if (Block) {
+        BodyBB = visitExpBlock(std::move(Block), "forBody", nullptr);
+        // put end statement at the end of the body
+        if (End) {
+            Value* EndValue = End->acceptIRGenVisitor(this);
+        }
+    } else {
+        // empty BB
+        BodyBB = BasicBlock::Create(*TheContext, "forBody");
+        function->getBasicBlockList().push_back(BodyBB);
+        Builder->SetInsertPoint(BodyBB);
+        Instruction& currInst = BodyBB->back();
+        // dont't put a branch after a return statement
+        // put end statement at the end of the body
+        if (End && !currInst.isTerminator()) {
+            Value* EndValue = End->acceptIRGenVisitor(this);
+        }
+    }
+
+    // create for header
+    HeaderBB = BasicBlock::Create(*TheContext, "forHeader");
+    function->getBasicBlockList().push_back(HeaderBB);
+    Builder->SetInsertPoint(HeaderBB);
+
+    // branch from parent to header
+    Builder->SetInsertPoint(parentBB);
+    Builder->CreateBr(HeaderBB);
+
+    // create for cont
+    ContBB = BasicBlock::Create(*TheContext, "forCont");
+    function->getBasicBlockList().push_back(ContBB);
+
+    Builder->SetInsertPoint(HeaderBB);
+    Value* cond;
+    if (Cond) {
+        // we have a condition
+        cond = Cond->acceptIRGenVisitor(this);
+
+    } else {
+        //without a condiction we have an infinite loop
+        // branch from header to body
+        cond = ConstantInt::get(*TheContext, APInt(1, 1, false));
+    }
+    Builder->CreateCondBr(cond, BodyBB, ContBB);
+
+    // branch from body to header
+    Instruction& currInst = BodyBB->back();
+    // dont't put a branch after a return statement
+    if (!currInst.isTerminator()) {
+        Builder->SetInsertPoint(BodyBB);
+        Builder->CreateBr(HeaderBB);
+    }
+
+    Builder->SetInsertPoint(ContBB);
+    symbolTable.pop_scope();
+
 }
 
 

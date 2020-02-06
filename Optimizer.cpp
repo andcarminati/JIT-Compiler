@@ -44,7 +44,7 @@ void Optimizer::InitializePassManager() {
 void Optimizer::optimizeCode() {
 
     for (auto &Func : TheModule->getFunctionList()) {
-        //Func.print(errs());
+        Func.print(errs());
        
         verifyFunction(Func, &errs());
         //TheFPM->run(Func);
