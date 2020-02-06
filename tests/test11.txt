@@ -1,5 +1,6 @@
 extern integer printinteger(integer v);
 extern real printreal(real v);
+extern integer sleep(integer t);
 
 
 function real main() {
@@ -7,9 +8,12 @@ function real main() {
     let integer b = 4;
     let integer c = 5;
     
-    for(let integer i = 0; i < 10; i++){}
+    for(let integer i = 0; i < 10000; i++){
+        printinteger(i);
+        sleep(1);
+    }
     
-    printinteger(c);
+    
     
     return 5.0;
 }

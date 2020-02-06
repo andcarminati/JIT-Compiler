@@ -214,7 +214,7 @@ std::unique_ptr<ExprBlockAST> Parser::ParseExprBlock() {
             if (lexer->getCurrentToken() != ';') {
                 fail();
                 return LogError<ExprBlockAST>("Expected ; in expression",
-                        block->getDebugInfo()->getInfo());
+                        E->getDebugInfo()->getInfo());
             }
             lexer->getNextToken();
         }
@@ -556,7 +556,7 @@ std::unique_ptr<ExprAST> Parser::ParseForExpr() {
 
     auto DI = genDebugInfo();
     std::unique_ptr<ExprAST> Start = nullptr;
-    std::unique_ptr<ExprAST> Step = nullptr;
+    std::unique_ptr<ExprAST> Cond = nullptr;
     std::unique_ptr<ExprAST> End = nullptr;
     lexer->getNextToken(); // eat the if.
     if (lexer->getCurrentToken() != '(') {
@@ -582,7 +582,7 @@ std::unique_ptr<ExprAST> Parser::ParseForExpr() {
 
     // we have a step?
     if (lexer->getCurrentToken() != ';') {
-        Step = ParseExpression();
+        Cond = ParseExpression();
     }
 
     if (lexer->getCurrentToken() != ';') {
@@ -605,8 +605,8 @@ std::unique_ptr<ExprAST> Parser::ParseForExpr() {
 
     auto Block = ParseExprBlock();
 
-    return std::make_unique<ForExprAST>(std::move(DI), std::move(Start), std::move(Step),
-            std::move(Step), std::move(Block));
+    return std::make_unique<ForExprAST>(std::move(DI), std::move(Start), std::move(End),
+            std::move(Cond), std::move(Block));
 }
 
 std::unique_ptr<ExprAST> Parser::ParseLocalDeclarationExpr() {

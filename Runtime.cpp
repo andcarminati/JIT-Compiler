@@ -33,4 +33,3 @@ extern "C" DLLEXPORT void printreal(double X) {
 extern "C" DLLEXPORT void printinteger(long long X) {
   fprintf(stderr, "%lld\n", X);
 }
-
