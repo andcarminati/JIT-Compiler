@@ -49,6 +49,7 @@ class CallExprAST;
 class UnaryExprAST;
 class LocalVarDeclarationExprAST;
 class ForExprAST;
+class WhileExprAST;
 
 using namespace llvm;
 
@@ -62,6 +63,7 @@ public:
     void visit(IfExprAST* ifexp);
     void visit(ReturnAST* ifexp);
     void visit(ForExprAST* node);
+    void visit(WhileExprAST* node);
     llvm::Value* visit(VariableExprAST* node);
     llvm::Value* visit(RealNumberExprAST* node);
     llvm::Value* visit(IntegerNumberExprAST* node);

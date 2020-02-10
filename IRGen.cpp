@@ -737,6 +737,13 @@ void IRGen::visit(ForExprAST* forExpr) {
 }
 
 
+// WhileExprAST overload
+
+void IRGen::visit(WhileExprAST* forExpr) {
+    
+}
+
+
 // Transfer the pointer out of this object.
 
 std::unique_ptr<Module> IRGen::getModule() {

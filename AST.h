@@ -471,9 +471,35 @@ public:
     std::unique_ptr<ExprBlockAST> getBody() {
         return std::move(Body);
     }
-
 };
 
+/// WhileExprAST - Expression class for for/in.
+
+class WhileExprAST : public ExprAST {
+    std::unique_ptr<ExprAST> Cond;
+    std::unique_ptr<ExprBlockAST> Body;
+
+public:
+
+    WhileExprAST(std::unique_ptr<DebugInfo> DI, std::unique_ptr<ExprAST> Cond,
+            std::unique_ptr<ExprBlockAST> Body)
+    : ExprAST(std::move(DI)), Cond(std::move(Cond)), Body(std::move(Body)) {
+    }
+
+    virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
+
+    virtual bool isSimple() {
+        return false;
+    }
+
+    std::unique_ptr<ExprAST> getCond() {
+        return std::move(Cond);
+    }
+
+    std::unique_ptr<ExprBlockAST> getBody() {
+        return std::move(Body);
+    }
+};
 
 #endif	/* AST_H */
 

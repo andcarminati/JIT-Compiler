@@ -67,4 +67,9 @@ llvm::Value* ForExprAST::acceptIRGenVisitor(IRGen* visitor){
     return nullptr;
 }
 
+llvm::Value* WhileExprAST::acceptIRGenVisitor(IRGen* visitor){
+    visitor->visit(this);
+    return nullptr;
+}
+
 
