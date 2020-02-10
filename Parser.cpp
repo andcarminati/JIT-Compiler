@@ -342,6 +342,9 @@ std::unique_ptr<ExprAST> Parser::ParsePrimary() {
         case tok_for:
             exp = ParseForExpr();
             break;
+        case tok_while:
+            exp = ParseWhileExpr();
+            break;
             //exp = 
     }
     return exp;
@@ -568,7 +571,7 @@ std::unique_ptr<ExprAST> Parser::ParseForExpr() {
     lexer->getNextToken();
 
     // parse for header
-    
+
     // we have a start?
     if (lexer->getCurrentToken() != ';') {
         Start = ParseExpression();
@@ -607,6 +610,13 @@ std::unique_ptr<ExprAST> Parser::ParseForExpr() {
 
     return std::make_unique<ForExprAST>(std::move(DI), std::move(Start), std::move(End),
             std::move(Cond), std::move(Block));
+}
+
+/// whileexpr ::= ...
+
+std::unique_ptr<ExprAST> Parser::ParseWhileExpr() {
+
+    return nullptr;
 }
 
 std::unique_ptr<ExprAST> Parser::ParseLocalDeclarationExpr() {
