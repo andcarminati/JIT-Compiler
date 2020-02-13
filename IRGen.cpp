@@ -663,6 +663,7 @@ void IRGen::visit(ForExprAST* forExpr) {
 
     BasicBlock* parentBB = Builder->GetInsertBlock();
     BasicBlock* BodyBB = nullptr;
+    BasicBlock* LastBodyBB = nullptr;
     BasicBlock* HeaderBB = nullptr;
     BasicBlock* ContBB = nullptr;
 
@@ -680,10 +681,14 @@ void IRGen::visit(ForExprAST* forExpr) {
 
     if (Block) {
         BodyBB = visitExpBlock(std::move(Block), "forBody", nullptr);
+        // get and updated vertion of the basic block. If we have inserted more blocks
+        // we need to continue from tha last block.
+        LastBodyBB = &function->getBasicBlockList().back();
         // put end statement at the end of the body
-        Instruction& currInst = BodyBB->back();
+        Instruction& currInst = LastBodyBB->back();
         // dont't put a branch after a return statement
         // put end statement at the end of the body
+        Builder->SetInsertPoint(LastBodyBB);
         if (End && !currInst.isTerminator()) {
             Value* EndValue = End->acceptIRGenVisitor(this);
         }
@@ -723,10 +728,10 @@ void IRGen::visit(ForExprAST* forExpr) {
     Builder->CreateCondBr(cond, BodyBB, ContBB);
 
     // branch from body to header
-    Instruction& currInst = BodyBB->back();
+    Instruction& currInst = LastBodyBB->back();
     // dont't put a branch after a return statement
     if (!currInst.isTerminator()) {
-        Builder->SetInsertPoint(BodyBB);
+        Builder->SetInsertPoint(LastBodyBB);
         Builder->CreateBr(HeaderBB);
     }
 
