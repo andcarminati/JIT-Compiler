@@ -529,16 +529,16 @@ Value* IRGen::visit(UnaryExprAST* node) {
                 result = Builder->CreateFAdd(var, ConstantFP::get(*TheContext,
                         APFloat(1.0)), "inctmp");
             } else {
-                result = Builder->CreateAdd(var,ConstantInt::get(*TheContext, APSInt::get(1)), "inctmp");
+                result = Builder->CreateAdd(var, ConstantInt::get(*TheContext, APSInt::get(1)), "inctmp");
             }
 
             break;
         case Operation::DEC:
             if (var->getType() == Type::getDoubleTy(*TheContext)) {
-                            result = Builder->CreateFSub(var, ConstantFP::get(*TheContext,
-                    APFloat(1.0)), "dectmp");
-            } else{
-                result = Builder->CreateSub(var,ConstantInt::get(*TheContext, APSInt::get(1)), "inctmp");
+                result = Builder->CreateFSub(var, ConstantFP::get(*TheContext,
+                        APFloat(1.0)), "dectmp");
+            } else {
+                result = Builder->CreateSub(var, ConstantInt::get(*TheContext, APSInt::get(1)), "inctmp");
             }
 
             break;
@@ -681,7 +681,10 @@ void IRGen::visit(ForExprAST* forExpr) {
     if (Block) {
         BodyBB = visitExpBlock(std::move(Block), "forBody", nullptr);
         // put end statement at the end of the body
-        if (End) {
+        Instruction& currInst = BodyBB->back();
+        // dont't put a branch after a return statement
+        // put end statement at the end of the body
+        if (End && !currInst.isTerminator()) {
             Value* EndValue = End->acceptIRGenVisitor(this);
         }
     } else {
@@ -689,10 +692,7 @@ void IRGen::visit(ForExprAST* forExpr) {
         BodyBB = BasicBlock::Create(*TheContext, "forBody");
         function->getBasicBlockList().push_back(BodyBB);
         Builder->SetInsertPoint(BodyBB);
-        Instruction& currInst = BodyBB->back();
-        // dont't put a branch after a return statement
-        // put end statement at the end of the body
-        if (End && !currInst.isTerminator()) {
+        if (End) {
             Value* EndValue = End->acceptIRGenVisitor(this);
         }
     }
@@ -700,7 +700,6 @@ void IRGen::visit(ForExprAST* forExpr) {
     // create for header
     HeaderBB = BasicBlock::Create(*TheContext, "forHeader");
     function->getBasicBlockList().push_back(HeaderBB);
-    Builder->SetInsertPoint(HeaderBB);
 
     // branch from parent to header
     Builder->SetInsertPoint(parentBB);
@@ -740,7 +739,51 @@ void IRGen::visit(ForExprAST* forExpr) {
 // WhileExprAST overload
 
 void IRGen::visit(WhileExprAST* forExpr) {
-    
+
+    BasicBlock* parentBB = Builder->GetInsertBlock();
+    BasicBlock* BodyBB = nullptr;
+    BasicBlock* HeaderBB = nullptr;
+    BasicBlock* ContBB = nullptr;
+
+    Function* function = parentBB->getParent();
+    std::unique_ptr<ExprBlockAST> Block = forExpr->getBody();
+    std::unique_ptr<ExprAST> Cond = forExpr->getCond();
+
+    if (Block) {
+        BodyBB = visitExpBlock(std::move(Block), "whileBody", nullptr);
+    } else {
+        // empty BB
+        BodyBB = BasicBlock::Create(*TheContext, "whileBody");
+        function->getBasicBlockList().push_back(BodyBB);
+        Builder->SetInsertPoint(BodyBB);
+    }
+
+    // create while header
+    HeaderBB = BasicBlock::Create(*TheContext, "forHeader");
+    function->getBasicBlockList().push_back(HeaderBB);
+
+    // branch from parent to header
+    Builder->SetInsertPoint(parentBB);
+    Builder->CreateBr(HeaderBB);
+
+
+    // create while cont
+    ContBB = BasicBlock::Create(*TheContext, "whileCont");
+    function->getBasicBlockList().push_back(ContBB);
+
+    Builder->SetInsertPoint(HeaderBB);
+    Value* cond = Cond->acceptIRGenVisitor(this);
+
+    Builder->CreateCondBr(cond, BodyBB, ContBB);
+    // branch from body to header
+    Instruction& currInst = BodyBB->back();
+    // dont't put a branch after a return statement
+    if (!currInst.isTerminator()) {
+        Builder->SetInsertPoint(BodyBB);
+        Builder->CreateBr(HeaderBB);
+    }
+
+    Builder->SetInsertPoint(ContBB);
 }
 
 

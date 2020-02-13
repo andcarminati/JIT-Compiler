@@ -561,7 +561,7 @@ std::unique_ptr<ExprAST> Parser::ParseForExpr() {
     std::unique_ptr<ExprAST> Start = nullptr;
     std::unique_ptr<ExprAST> Cond = nullptr;
     std::unique_ptr<ExprAST> End = nullptr;
-    lexer->getNextToken(); // eat the if.
+    lexer->getNextToken(); // eat the for.
     if (lexer->getCurrentToken() != '(') {
         fail();
         return LogError<ExprAST>("expected ( in for construct", DI->getInfo());
@@ -603,7 +603,7 @@ std::unique_ptr<ExprAST> Parser::ParseForExpr() {
         fail();
         return LogError<ExprAST>("expected ) in for construct", DI->getInfo());
     }
-    // Est '('
+    // Est ')'
     lexer->getNextToken();
 
     auto Block = ParseExprBlock();
@@ -616,7 +616,31 @@ std::unique_ptr<ExprAST> Parser::ParseForExpr() {
 
 std::unique_ptr<ExprAST> Parser::ParseWhileExpr() {
 
-    return nullptr;
+    auto DI = genDebugInfo();
+    std::unique_ptr<ExprAST> Cond = nullptr;
+    lexer->getNextToken(); // eat the while.
+
+    if (lexer->getCurrentToken() != '(') {
+        fail();
+        return LogError<ExprAST>("expected ( in for construct", DI->getInfo());
+    }
+    // Est ')'
+    lexer->getNextToken();
+
+    // parse condition
+    Cond = ParseExpression();
+
+    if (lexer->getCurrentToken() != ')') {
+        fail();
+        return LogError<ExprAST>("expected ) in for construct", DI->getInfo());
+    }
+    // Est ')'
+    lexer->getNextToken();
+
+    auto Block = ParseExprBlock();
+
+    return std::make_unique<WhileExprAST>(std::move(DI), std::move(Cond), std::move(Block));
+
 }
 
 std::unique_ptr<ExprAST> Parser::ParseLocalDeclarationExpr() {
