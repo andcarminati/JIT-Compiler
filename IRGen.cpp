@@ -747,6 +747,7 @@ void IRGen::visit(WhileExprAST* forExpr) {
 
     BasicBlock* parentBB = Builder->GetInsertBlock();
     BasicBlock* BodyBB = nullptr;
+    BasicBlock* LastBodyBB = nullptr;
     BasicBlock* HeaderBB = nullptr;
     BasicBlock* ContBB = nullptr;
 
@@ -756,6 +757,7 @@ void IRGen::visit(WhileExprAST* forExpr) {
 
     if (Block) {
         BodyBB = visitExpBlock(std::move(Block), "whileBody", nullptr);
+        LastBodyBB = &function->getBasicBlockList().back();
     } else {
         // empty BB
         BodyBB = BasicBlock::Create(*TheContext, "whileBody");
@@ -781,10 +783,10 @@ void IRGen::visit(WhileExprAST* forExpr) {
 
     Builder->CreateCondBr(cond, BodyBB, ContBB);
     // branch from body to header
-    Instruction& currInst = BodyBB->back();
+    Instruction& currInst = LastBodyBB->back();
     // dont't put a branch after a return statement
     if (!currInst.isTerminator()) {
-        Builder->SetInsertPoint(BodyBB);
+        Builder->SetInsertPoint(LastBodyBB);
         Builder->CreateBr(HeaderBB);
     }
 
