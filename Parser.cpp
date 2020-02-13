@@ -36,7 +36,7 @@ void LogWarn(const char *Str, std::string loc) {
 
 std::unique_ptr<DebugInfo> Parser::genDebugInfo() {
 
-    return std::make_unique<DebugInfo>(DebugInfo(lexer->GetTokLine(), lexer->GetTokCol(), lexer->getFileName()));
+    return std::make_unique<DebugInfo>(DebugInfo(lexer->GetTokLine(), lexer->GetTokCol(), lexer->getFileName(), lexer->getLineStr()));
 }
 
 void Parser::fail() {
@@ -232,7 +232,7 @@ std::unique_ptr<ExprBlockAST> Parser::ParseExprBlock() {
     if (lexer->getCurrentToken() != '}') {
         fail();
         return LogError<ExprBlockAST>("Expected } in function body termination",
-                block->getDebugInfo()->getInfo());
+                genDebugInfo()->getInfo());
     }
 
     lexer->getNextToken();

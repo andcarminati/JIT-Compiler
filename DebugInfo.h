@@ -13,14 +13,14 @@
 class DebugInfo {
 public:
 
-    DebugInfo(int line, int column, std::string file) : line(line), column(column), file(file) {
+    DebugInfo(int line, int column, std::string file, std::string LineStr) : line(line), column(column), file(file), LineStr(LineStr) {
     }
     
     virtual ~DebugInfo() {}
 
     std::string getInfo() {
         std::string str = std::string(file);
-        str.append(": line " + std::to_string(line) + " col " + std::to_string(column));
+        str.append(": line " + std::to_string(line) + " col " + std::to_string(column) + ": " + LineStr);
         return str;
     }
 
@@ -28,6 +28,7 @@ private:
     int line;
     int column;
     std::string file;
+    std::string LineStr;
 };
 
 

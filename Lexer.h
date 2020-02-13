@@ -83,6 +83,7 @@ public:
     int GetTokLine();
     int GetTokCol();
     std::string& getFileName();
+    std::string getLineStr();
 
 private:
     int CurTok = ';';
@@ -93,12 +94,14 @@ private:
     std::map<Operation, int> BinopPrecedence;
     std::unique_ptr<std::ifstream> file;
     std::string IdentifierStr; // Filled in if tok_identifier
+    std::string LineStr;
     double NumValReal; // Filled in if tok_real
     double NumValInteger; // Filled in if tok_real
     Operation CurrOperation;
     OperationType CurrOpType;
     std::string FileName;
     int getTok();
+    int NextChar();
 
 };
 
