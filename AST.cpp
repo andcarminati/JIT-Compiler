@@ -17,59 +17,68 @@
 #include "IRGen.h"
 #include <iostream>
 
-void FunctionAST::acceptIRGenVisitor(IRGen* visitor) {
+/*void FunctionAST::acceptIRGenVisitor(IRGen* visitor) {
     visitor->visit(this);
-}
+}*/
 
+/*
 void PrototypeAST::acceptIRGenVisitor(IRGen* visitor) {
     visitor->visit(this);
-}
+}*/
+/*
 llvm::Value* IfExprAST::acceptIRGenVisitor(IRGen* visitor){
     visitor->visit(this);
     return nullptr;
-}
+}*/
 
+/*
 llvm::Value* ReturnAST::acceptIRGenVisitor(IRGen* visitor) {
     visitor->visit(this);
     return nullptr;
-}
+}*/
 
+/*
 llvm::Value* RealNumberExprAST::acceptIRGenVisitor(IRGen* visitor) {
     return visitor->visit(this);
-}
-
+}*/
+/*
 llvm::Value* IntegerNumberExprAST::acceptIRGenVisitor(IRGen* visitor) {
     return visitor->visit(this);
-}
+}*/
 
+/*
 llvm::Value* VariableExprAST::acceptIRGenVisitor(IRGen* visitor) {
     return visitor->visit(this);
-}
+}*/
 
+/*
 llvm::Value* BinaryExprAST::acceptIRGenVisitor(IRGen* visitor){
     return visitor->visit(this);
-}
-
+}*/
+/*
 llvm::Value* UnaryExprAST::acceptIRGenVisitor(IRGen* visitor){
     return visitor->visit(this);
-}
+}*/
 
+/*
 llvm::Value* CallExprAST::acceptIRGenVisitor(IRGen* visitor){
     return visitor->visit(this);
-}
-
+}*/
+/*
 llvm::Value* LocalVarDeclarationExprAST::acceptIRGenVisitor(IRGen* visitor){
     return visitor->visit(this);
-}
+}*/
 
+/*
 llvm::Value* ForExprAST::acceptIRGenVisitor(IRGen* visitor){
     visitor->visit(this);
     return nullptr;
-}
+}*/
 
+/*
 llvm::Value* WhileExprAST::acceptIRGenVisitor(IRGen* visitor){
     visitor->visit(this);
     return nullptr;
-}
+}*/
 
 

@@ -99,7 +99,10 @@ public:
 
     RealNumberExprAST(std::unique_ptr<DebugInfo>&& DI, double Val) : ExprAST(std::move(DI)), Val(Val) {
     }
-    virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
+
+    llvm::Value* acceptIRGenVisitor(IRGen* visitor) {
+        return visitor->visit(this);
+    }
 
     double getVal() {
         return Val;
@@ -115,7 +118,10 @@ public:
 
     IntegerNumberExprAST(std::unique_ptr<DebugInfo>&& DI, long Val) : ExprAST(std::move(DI)), Val(Val) {
     }
-    virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
+
+    llvm::Value* acceptIRGenVisitor(IRGen* visitor) {
+        return visitor->visit(this);
+    }
 
     long long getVal() {
         return Val;
@@ -139,7 +145,9 @@ public:
     virtual ~LocalVarDeclarationExprAST() {
     }
 
-    virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
+    llvm::Value* acceptIRGenVisitor(IRGen* visitor) {
+        return visitor->visit(this);
+    }
 
     std::string& getName() {
         return Name;
@@ -167,7 +175,9 @@ public:
     virtual ~VariableExprAST() {
     }
 
-    virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
+    llvm::Value* acceptIRGenVisitor(IRGen* visitor) {
+        return visitor->visit(this);
+    }
 
     std::string& getName() {
         return Name;
@@ -188,7 +198,10 @@ public:
             std::unique_ptr<ExprAST>&& RHS)
     : ExprAST(std::move(DI)), Op(op), LHS(std::move(LHS)), RHS(std::move(RHS)) {
     }
-    virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
+
+    llvm::Value* acceptIRGenVisitor(IRGen* visitor) {
+        return visitor->visit(this);
+    }
 
     Operation getOp() {
         return Op;
@@ -215,7 +228,10 @@ public:
     UnaryExprAST(std::unique_ptr<DebugInfo>&& DI, Operation op, std::unique_ptr<ExprAST>&& LRHS, bool prefix)
     : ExprAST(std::move(DI)), Op(op), LRHS(std::move(LRHS)), prefix(prefix) {
     }
-    virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
+
+    llvm::Value* acceptIRGenVisitor(IRGen* visitor) {
+        return visitor->visit(this);
+    }
 
     Operation getOp() {
         return Op;
@@ -251,13 +267,14 @@ class ReturnAST : public ExprAST {
     std::unique_ptr<ExprAST> RHS;
 public:
 
-    ReturnAST(std::unique_ptr<DebugInfo>&& DI, std::unique_ptr<ExprAST>&& RHS) : 
-            ExprAST(std::move(DI)), RHS(std::move(RHS)) {
+    ReturnAST(std::unique_ptr<DebugInfo>&& DI, std::unique_ptr<ExprAST>&& RHS) :
+    ExprAST(std::move(DI)), RHS(std::move(RHS)) {
     }
 
-    //virtual ~ReturnAST(){}
-
-    virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
+    llvm::Value* acceptIRGenVisitor(IRGen* visitor) {
+        visitor->visit(this);
+        return nullptr;
+    }
 
     virtual bool isUncondTransfer() {
         return true;
@@ -282,7 +299,10 @@ public:
             std::vector<std::unique_ptr<ExprAST>>&& Args)
     : ExprAST(std::move(DI)), Callee(Callee), Args(std::move(Args)) {
     }
-    virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
+
+    llvm::Value* acceptIRGenVisitor(IRGen* visitor) {
+        return visitor->visit(this);
+    }
 
     std::string& getCalee() {
         return Callee;
@@ -326,7 +346,9 @@ public:
     : PrimaryAST(std::move(DI)), returnType(returnType), Name(name), Args(std::move(Args)) {
     }
 
-    void acceptIRGenVisitor(IRGen* visitor);
+    void acceptIRGenVisitor(IRGen* visitor) {
+        visitor->visit(this);
+    }
 
     VarType getReturnType() {
         return returnType;
@@ -389,7 +411,10 @@ public:
             std::unique_ptr<ExprBlockAST>&& Body)
     : PrimaryAST(std::move(DI)), Proto(std::move(Proto)), Body(std::move(Body)) {
     }
-    void acceptIRGenVisitor(IRGen* visitor);
+
+    void acceptIRGenVisitor(IRGen* visitor) {
+        visitor->visit(this);
+    }
 
     const std::string &getName() const {
         return Proto->getName();
@@ -416,7 +441,11 @@ public:
             std::unique_ptr<ExprBlockAST>&& Else)
     : ExprAST(std::move(DI)), Cond(std::move(Cond)), Then(std::move(Then)), Else(std::move(Else)) {
     }
-    virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
+
+    llvm::Value* acceptIRGenVisitor(IRGen* visitor) {
+        visitor->visit(this);
+        return nullptr;
+    }
 
     virtual bool isSimple() {
         return false;
@@ -450,7 +479,10 @@ public:
     Cond(std::move(Cond)), Body(std::move(Body)) {
     }
 
-    virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
+    llvm::Value* acceptIRGenVisitor(IRGen* visitor) {
+        visitor->visit(this);
+        return nullptr;
+    }
 
     virtual bool isSimple() {
         return false;
@@ -486,7 +518,10 @@ public:
     : ExprAST(std::move(DI)), Cond(std::move(Cond)), Body(std::move(Body)) {
     }
 
-    virtual llvm::Value* acceptIRGenVisitor(IRGen* visitor);
+    llvm::Value* acceptIRGenVisitor(IRGen* visitor) {
+        visitor->visit(this);
+        return nullptr;
+    }
 
     virtual bool isSimple() {
         return false;
