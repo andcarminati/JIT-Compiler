@@ -1,0 +1,23 @@
+extern integer printinteger(integer v);
+extern real printreal(real v);
+extern integer sleep(integer t);
+extern integer fork();
+
+function none dowork(integer pid){
+    if(pid == 0) {
+        sleep(1);
+        printinteger(1);
+    } else {
+        sleep(2);
+        printinteger(2);
+    }
+}
+
+function real main() {
+
+    let integer pid = fork();
+    
+    dowork(pid);
+    
+    return 5.0;
+}

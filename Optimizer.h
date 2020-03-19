@@ -35,7 +35,7 @@ using namespace llvm;
 class Optimizer {
 public:
 
-    Optimizer(LLVMContext* TheContext, std::unique_ptr<Module> TheModule) :
+    Optimizer(LLVMContext* TheContext, std::unique_ptr<Module>&& TheModule) :
     TheContext(TheContext), TheModule(std::move(TheModule)) {
         InitializePassManager();
     }

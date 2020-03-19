@@ -22,7 +22,7 @@
 
 class Parser {
 public:
-    Parser(std::unique_ptr<Lexer> lexer): lexer(std::move(lexer)){}
+    Parser(std::unique_ptr<Lexer>&& lexer): lexer(std::move(lexer)){}
     //Parser(const Parser& orig) { std::cout << "teste";};
     //virtual ~Parser() {};
     

@@ -8,11 +8,16 @@ function real main() {
     let integer b = 4;
     let integer c = 5;
     
-    for(let integer i = 0; i < 10000; i++){
+    for(let integer i = 0; i < 5; i++){
         printinteger(i);
         sleep(1);
+        let integer j = 10;
+        while(j < 12){
+            sleep(2);
+            printinteger(j);
+            j++;
+        }
     }
-    
     
     
     return 5.0;

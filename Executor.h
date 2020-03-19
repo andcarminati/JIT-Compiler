@@ -26,7 +26,7 @@ using namespace llvm::orc;
 class Executor {
 public:
 
-    Executor(LLVMContext* TheContext, std::unique_ptr<Module> TheModule) :
+    Executor(LLVMContext* TheContext, std::unique_ptr<Module>&& TheModule) :
     TheContext(TheContext), TheModule(std::move(TheModule)) {
     }
 

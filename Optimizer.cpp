@@ -47,7 +47,7 @@ void Optimizer::optimizeCode() {
         //Func.print(errs());
        
         verifyFunction(Func, &errs());
-        //TheFPM->run(Func);
+        TheFPM->run(Func);
         //Func.print(errs());
         
     }
