@@ -24,11 +24,11 @@
 #include <list>
 #include <iostream>
 
-#include "IRGen.h"
+#include "LLVMIRGen.h"
 #include "LangDefs.h"
 #include "DebugInfo.h"
 
-class IRGen;
+class LLVMIRGen;
 
 /// BaseAST - base for all other classes
 template<typename T>
@@ -60,7 +60,7 @@ public:
     virtual ~PrimaryAST() {
     }
 
-    virtual void acceptIRGenVisitor(IRGen* visitor) {
+    virtual void acceptIRGenVisitor(LLVMIRGen* visitor) {
     }
 };
 
@@ -77,7 +77,7 @@ public:
     virtual ~ExprAST() {
     }
 
-    virtual T acceptIRGenVisitor(IRGen* visitor) {
+    virtual T acceptIRGenVisitor(LLVMIRGen* visitor) {
         printf("Not implemented AST node\n");
         return nullptr;
     }
@@ -103,7 +103,7 @@ public:
     RealNumberExprAST(std::unique_ptr<DebugInfo>&& DI, double Val) : ExprAST<T>(std::move(DI)), Val(Val) {
     }
 
-    T acceptIRGenVisitor(IRGen* visitor) {
+    T acceptIRGenVisitor(LLVMIRGen* visitor) {
         return visitor->visit(this);
     }
 
@@ -123,7 +123,7 @@ public:
     IntegerNumberExprAST(std::unique_ptr<DebugInfo>&& DI, long Val) : ExprAST<T>(std::move(DI)), Val(Val) {
     }
 
-    T acceptIRGenVisitor(IRGen* visitor) {
+    T acceptIRGenVisitor(LLVMIRGen* visitor) {
         return visitor->visit(this);
     }
 
@@ -150,7 +150,7 @@ public:
     virtual ~LocalVarDeclarationExprAST() {
     }
 
-    T acceptIRGenVisitor(IRGen* visitor) {
+    T acceptIRGenVisitor(LLVMIRGen* visitor) {
         return visitor->visit(this);
     }
 
@@ -181,7 +181,7 @@ public:
     virtual ~VariableExprAST() {
     }
 
-    T acceptIRGenVisitor(IRGen* visitor) {
+    T acceptIRGenVisitor(LLVMIRGen* visitor) {
         return visitor->visit(this);
     }
 
@@ -206,7 +206,7 @@ public:
     : ExprAST<T>(std::move(DI)), Op(op), LHS(std::move(LHS)), RHS(std::move(RHS)) {
     }
 
-    T acceptIRGenVisitor(IRGen* visitor) {
+    T acceptIRGenVisitor(LLVMIRGen* visitor) {
         return visitor->visit(this);
     }
 
@@ -237,7 +237,7 @@ public:
     : ExprAST<T>(std::move(DI)), Op(op), LRHS(std::move(LRHS)), prefix(prefix) {
     }
 
-    T acceptIRGenVisitor(IRGen* visitor) {
+    T acceptIRGenVisitor(LLVMIRGen* visitor) {
         return visitor->visit(this);
     }
 
@@ -267,7 +267,7 @@ public:
             std::unique_ptr<ExprAST<T>>&& RHS)
     : ExprAST<T>(std::move(DI)), VarName(VarName), RHS(std::move(RHS)) {
     }
-    virtual T acceptIRGenVisitor(IRGen* visitor);
+    virtual T acceptIRGenVisitor(LLVMIRGen* visitor);
 };
 
 /// ReturnAST - class for return nodes.
@@ -281,7 +281,7 @@ public:
     ExprAST<T>(std::move(DI)), RHS(std::move(RHS)) {
     }
 
-    T acceptIRGenVisitor(IRGen* visitor) {
+    T acceptIRGenVisitor(LLVMIRGen* visitor) {
         visitor->visit(this);
         return nullptr;
     }
@@ -311,7 +311,7 @@ public:
     : ExprAST<T>(std::move(DI)), Callee(Callee), Args(std::move(Args)) {
     }
 
-    T acceptIRGenVisitor(IRGen* visitor) {
+    T acceptIRGenVisitor(LLVMIRGen* visitor) {
         return visitor->visit(this);
     }
 
@@ -358,7 +358,7 @@ public:
     : PrimaryAST<T>(std::move(DI)), returnType(returnType), Name(name), Args(std::move(Args)) {
     }
 
-    void acceptIRGenVisitor(IRGen* visitor) {
+    void acceptIRGenVisitor(LLVMIRGen* visitor) {
         visitor->visit(this);
     }
 
@@ -426,7 +426,7 @@ public:
     : PrimaryAST<T>(std::move(DI)), Proto(std::move(Proto)), Body(std::move(Body)) {
     }
 
-    void acceptIRGenVisitor(IRGen* visitor) {
+    void acceptIRGenVisitor(LLVMIRGen* visitor) {
         visitor->visit(this);
     }
 
@@ -457,7 +457,7 @@ public:
     : ExprAST<T>(std::move(DI)), Cond(std::move(Cond)), Then(std::move(Then)), Else(std::move(Else)) {
     }
 
-    T acceptIRGenVisitor(IRGen* visitor) {
+    T acceptIRGenVisitor(LLVMIRGen* visitor) {
         visitor->visit(this);
         return nullptr;
     }
@@ -495,7 +495,7 @@ public:
     Cond(std::move(Cond)), Body(std::move(Body)) {
     }
 
-    T acceptIRGenVisitor(IRGen* visitor) {
+    T acceptIRGenVisitor(LLVMIRGen* visitor) {
         visitor->visit(this);
         return nullptr;
     }
@@ -534,7 +534,7 @@ public:
     : ExprAST<T>(std::move(DI)), Cond(std::move(Cond)), Body(std::move(Body)) {
     }
 
-    T acceptIRGenVisitor(IRGen* visitor) {
+    T acceptIRGenVisitor(LLVMIRGen* visitor) {
         visitor->visit(this);
         return nullptr;
     }

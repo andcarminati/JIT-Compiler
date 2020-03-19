@@ -24,7 +24,7 @@
 #include "Parser.h"
 #include "Lexer.h"
 #include "AST.h"
-#include "IRGen.h"
+#include "LLVMIRGen.h"
 #include "Optimizer.h"
 #include "Executor.h"
 
@@ -35,7 +35,7 @@ static llvm::LLVMContext TheContext;
 
 static void Driver(std::shared_ptr<Parser<llvm::Value*>> parser){
     
-    auto generator = std::make_unique<IRGen>(IRGen(&TheContext));
+    auto generator = std::make_unique<LLVMIRGen>(LLVMIRGen(&TheContext));
     
     while(true){
         auto exp = parser->nextConstruct();

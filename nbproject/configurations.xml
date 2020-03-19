@@ -5,10 +5,11 @@
                    displayName="Arquivos de Cabeçalho"
                    projectFiles="true">
       <itemPath>AST.h</itemPath>
+      <itemPath>AbstractIRGen.h</itemPath>
       <itemPath>DebugInfo.h</itemPath>
       <itemPath>Executor.h</itemPath>
-      <itemPath>IRGen.h</itemPath>
       <itemPath>JIT.h</itemPath>
+      <itemPath>LLVMIRGen.h</itemPath>
       <itemPath>LangDefs.h</itemPath>
       <itemPath>Lexer.h</itemPath>
       <itemPath>Optimizer.h</itemPath>
@@ -19,7 +20,7 @@
                    displayName="Arquivos de Código-Fonte"
                    projectFiles="true">
       <itemPath>Executor.cpp</itemPath>
-      <itemPath>IRGen.cpp</itemPath>
+      <itemPath>LLVMIRGen.cpp</itemPath>
       <itemPath>Lexer.cpp</itemPath>
       <itemPath>Optimizer.cpp</itemPath>
       <itemPath>Runtime.cpp</itemPath>
@@ -66,19 +67,21 @@
       </compileType>
       <item path="AST.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="AbstractIRGen.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="DebugInfo.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Executor.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Executor.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="IRGen.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="IRGen.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="JIT.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="LICENSE.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="LLVMIRGen.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="LLVMIRGen.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="LangDefs.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -127,19 +130,21 @@
       </compileType>
       <item path="AST.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="AbstractIRGen.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="DebugInfo.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Executor.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Executor.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="IRGen.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="IRGen.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="JIT.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="LICENSE.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="LLVMIRGen.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="LLVMIRGen.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="LangDefs.h" ex="false" tool="3" flavor2="0">
       </item>

@@ -36,7 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/Executor.o \
-	${OBJECTDIR}/IRGen.o \
+	${OBJECTDIR}/LLVMIRGen.o \
 	${OBJECTDIR}/Lexer.o \
 	${OBJECTDIR}/Optimizer.o \
 	${OBJECTDIR}/Runtime.o \
@@ -73,10 +73,10 @@ ${OBJECTDIR}/Executor.o: Executor.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Executor.o Executor.cpp
 
-${OBJECTDIR}/IRGen.o: IRGen.cpp 
+${OBJECTDIR}/LLVMIRGen.o: LLVMIRGen.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/IRGen.o IRGen.cpp
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/LLVMIRGen.o LLVMIRGen.cpp
 
 ${OBJECTDIR}/Lexer.o: Lexer.cpp 
 	${MKDIR} -p ${OBJECTDIR}
