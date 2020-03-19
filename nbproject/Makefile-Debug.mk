@@ -35,12 +35,10 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/AST.o \
 	${OBJECTDIR}/Executor.o \
 	${OBJECTDIR}/IRGen.o \
 	${OBJECTDIR}/Lexer.o \
 	${OBJECTDIR}/Optimizer.o \
-	${OBJECTDIR}/Parser.o \
 	${OBJECTDIR}/Runtime.o \
 	${OBJECTDIR}/SymbolTable.o \
 	${OBJECTDIR}/main.o
@@ -70,11 +68,6 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/interpreter: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	clang++ -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/interpreter ${OBJECTFILES} ${LDLIBSOPTIONS} -lstdc++ `llvm-config --ldflags --libs` -lpthread -ltinfo -rdynamic
 
-${OBJECTDIR}/AST.o: AST.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/AST.o AST.cpp
-
 ${OBJECTDIR}/Executor.o: Executor.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -94,11 +87,6 @@ ${OBJECTDIR}/Optimizer.o: Optimizer.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Optimizer.o Optimizer.cpp
-
-${OBJECTDIR}/Parser.o: Parser.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Parser.o Parser.cpp
 
 ${OBJECTDIR}/Runtime.o: Runtime.cpp 
 	${MKDIR} -p ${OBJECTDIR}

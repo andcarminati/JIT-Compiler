@@ -18,12 +18,10 @@
     <logicalFolder name="SourceFiles"
                    displayName="Arquivos de Código-Fonte"
                    projectFiles="true">
-      <itemPath>AST.cpp</itemPath>
       <itemPath>Executor.cpp</itemPath>
       <itemPath>IRGen.cpp</itemPath>
       <itemPath>Lexer.cpp</itemPath>
       <itemPath>Optimizer.cpp</itemPath>
-      <itemPath>Parser.cpp</itemPath>
       <itemPath>Runtime.cpp</itemPath>
       <itemPath>SymbolTable.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
@@ -66,8 +64,6 @@
           <commandLine>-lstdc++ `llvm-config --ldflags --libs` -lpthread -ltinfo -rdynamic</commandLine>
         </linkerTool>
       </compileType>
-      <item path="AST.cpp" ex="false" tool="1" flavor2="0">
-      </item>
       <item path="AST.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="DebugInfo.h" ex="false" tool="3" flavor2="0">
@@ -95,8 +91,6 @@
       <item path="Optimizer.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Optimizer.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Parser.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Parser.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -131,8 +125,6 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
-      <item path="AST.cpp" ex="false" tool="1" flavor2="0">
-      </item>
       <item path="AST.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="DebugInfo.h" ex="false" tool="3" flavor2="0">
@@ -160,8 +152,6 @@
       <item path="Optimizer.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Optimizer.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Parser.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Parser.h" ex="false" tool="3" flavor2="0">
       </item>

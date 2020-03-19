@@ -84,18 +84,18 @@ IRGen::IRGen(llvm::LLVMContext* TheContext) {
 
 // Entry point of the IR Generator. Using a visitor design pattern.
 
-void IRGen::GenFromAST(std::unique_ptr<PrimaryAST> node) {
+void IRGen::GenFromAST(std::unique_ptr<PrimaryAST<LLMVValue>> node) {
     node->acceptIRGenVisitor(this);
 }
 
 // Prorotype overload.
 
-void IRGen::visit(PrototypeAST* proto) {
+void IRGen::visit(PrototypeAST<LLMVValue>* proto) {
     auto *TheFunction = visitFunctionPrototypeImpl(proto);
 }
 // FunctionAST overload.
 
-void IRGen::visit(FunctionAST* node) {
+void IRGen::visit(FunctionAST<LLMVValue>* node) {
     // calls the real implementation
     auto *TheFunction = visitFunctionImpl(node);
     if (TheFunction) {
@@ -105,7 +105,7 @@ void IRGen::visit(FunctionAST* node) {
 
 // Internal method for prototype function generation
 
-Function* IRGen::visitFunctionPrototypeImpl(PrototypeAST* node) {
+Function* IRGen::visitFunctionPrototypeImpl(PrototypeAST<LLMVValue>* node) {
 
     std::vector<Arg>& Args = node->getArgs();
     const std::string& Name = node->getName();
@@ -141,14 +141,14 @@ Function* IRGen::visitFunctionPrototypeImpl(PrototypeAST* node) {
 
 // Private method for the real job. 
 
-Function* IRGen::visitFunctionImpl(FunctionAST* node) {
+Function* IRGen::visitFunctionImpl(FunctionAST<LLMVValue>* node) {
     // First, check for an existing function from a previous 'extern' declaration.
     const std::string& Name = node->getName();
     Function *TheFunction = TheModule->getFunction(Name);
     auto DI = node->getDebugInfo();
     if (!TheFunction) {
         // generator must owns the prototype pointer  
-        std::unique_ptr<PrototypeAST> proto = node->getProto();
+        std::unique_ptr<PrototypeAST<LLMVValue>> proto = node->getProto();
         // gen code for prototype
         proto->acceptIRGenVisitor(this);
         TheFunction = TheModule->getFunction(Name);
@@ -234,7 +234,7 @@ Value* IRGen::allocLocalVar(Function* function, std::string& name, VarType type,
 
 // Private method for expression block code generation.
 
-BasicBlock* IRGen::visitExpBlock(std::unique_ptr<ExprBlockAST> block,
+BasicBlock* IRGen::visitExpBlock(std::unique_ptr<ExprBlockAST<LLMVValue>> block,
         std::string name, Function* function) {
 
     symbolTable.push_scope();
@@ -261,7 +261,7 @@ BasicBlock* IRGen::visitExpBlock(std::unique_ptr<ExprBlockAST> block,
 
     // generate IR for all expressions
     while (!block->empty()) {
-        std::unique_ptr<ExprAST> expr = block->nextExp();
+        std::unique_ptr<ExprAST<LLMVValue>> expr = block->nextExp();
         expr->acceptIRGenVisitor(this);
     }
 
@@ -289,16 +289,16 @@ BasicBlock* IRGen::visitExpBlock(std::unique_ptr<ExprBlockAST> block,
     return BB;
 }
 
-void IRGen::visit(IfExprAST* ifexp) {
+void IRGen::visit(IfExprAST<LLMVValue>* ifexp) {
 
     BasicBlock* parentBB = Builder->GetInsertBlock();
     BasicBlock* thenBB = nullptr;
     BasicBlock* elseBB = nullptr;
     BasicBlock* contBB = nullptr;
     Function* function = parentBB->getParent();
-    std::unique_ptr<ExprBlockAST> ThenBlock = ifexp->getThen();
-    std::unique_ptr<ExprBlockAST> ElseBlock = ifexp->getElse();
-    std::unique_ptr<ExprAST> Condition = ifexp->getCondition();
+    std::unique_ptr<ExprBlockAST<LLMVValue>> ThenBlock = ifexp->getThen();
+    std::unique_ptr<ExprBlockAST<LLMVValue>> ElseBlock = ifexp->getElse();
+    std::unique_ptr<ExprAST<LLMVValue>> Condition = ifexp->getCondition();
 
     // then and merge blocks
     contBB = BasicBlock::Create(*TheContext, "cont");
@@ -349,7 +349,7 @@ void IRGen::visit(IfExprAST* ifexp) {
 
 // VariableExprAST overload
 
-llvm::Value* IRGen::visit(VariableExprAST* node) {
+llvm::Value* IRGen::visit(VariableExprAST<LLMVValue>* node) {
 
     auto DI = node->getDebugInfo();
     if (!symbolTable.contains(node->getName())) {
@@ -370,32 +370,32 @@ llvm::Value* IRGen::visit(VariableExprAST* node) {
 
 // RealNumberExprAST overload.
 
-Value* IRGen::visit(RealNumberExprAST* node) {
+Value* IRGen::visit(RealNumberExprAST<LLMVValue>* node) {
     return ConstantFP::get(*TheContext, APFloat(node->getVal()));
 }
 
 // IntegerNumberExprAST overload.
 
-Value* IRGen::visit(IntegerNumberExprAST* node) {
+Value* IRGen::visit(IntegerNumberExprAST<LLMVValue>* node) {
     return ConstantInt::get(*TheContext, APSInt::get(node->getVal()));
 }
 
 
 // BinaryExprAST overload.
 
-Value* IRGen::visit(BinaryExprAST* node) {
+Value* IRGen::visit(BinaryExprAST<LLMVValue>* node) {
 
     auto DI = node->getDebugInfo();
     Operation Op = node->getOp();
-    std::unique_ptr<ExprAST> LHS = node->getLHS();
-    std::unique_ptr<ExprAST> RHS = node->getRHS();
+    std::unique_ptr<ExprAST<LLMVValue>> LHS = node->getLHS();
+    std::unique_ptr<ExprAST<LLMVValue>> RHS = node->getRHS();
 
     if (Op == Operation::ASSIGN) {
         // Assignment requires the LHS to be an identifier.
         // This assume we're building without RTTI because LLVM builds that way by
         // default.  If you build LLVM with RTTI this can be changed to a
         // dynamic_cast for automatic error checking.
-        VariableExprAST *LHSE = static_cast<VariableExprAST *> (LHS.get());
+        VariableExprAST<LLMVValue> *LHSE = static_cast<VariableExprAST<LLMVValue> *> (LHS.get());
         if (!LHSE) {
             LogError("destination of '=' must be a variable", DI->getInfo());
             // return LogErrorV("destination of '=' must be a variable");
@@ -501,15 +501,15 @@ Value* IRGen::visit(BinaryExprAST* node) {
     return nullptr;
 }
 
-Value* IRGen::visit(UnaryExprAST* node) {
+Value* IRGen::visit(UnaryExprAST<LLMVValue>* node) {
 
     auto DI = node->getDebugInfo();
-    std::unique_ptr<ExprAST> LRHS = node->getLRHS();
+    std::unique_ptr<ExprAST<LLMVValue>> LRHS = node->getLRHS();
     Operation op = node->getOp();
     bool isPrefixed = node->isPrefix();
     Value* result;
 
-    VariableExprAST *LHSE = static_cast<VariableExprAST *> (LRHS.get());
+    VariableExprAST<LLMVValue> *LHSE = static_cast<VariableExprAST<LLMVValue> *> (LRHS.get());
     if (!LHSE) {
         abort("unary operand must be a variable", DI->getInfo());
         // return LogErrorV("destination of '=' must be a variable");
@@ -558,10 +558,10 @@ Value* IRGen::visit(UnaryExprAST* node) {
 
 // ReturnAST overload
 
-void IRGen::visit(ReturnAST* ifexp) {
+void IRGen::visit(ReturnAST<LLMVValue>* ifexp) {
 
     auto DI = ifexp->getDebugInfo();
-    std::unique_ptr<ExprAST> RHS = ifexp->getExpr();
+    std::unique_ptr<ExprAST<LLMVValue>> RHS = ifexp->getExpr();
     // get the parent function for type verification
     Function* function = currentRetBB->getParent();
 
@@ -594,7 +594,7 @@ void IRGen::visit(ReturnAST* ifexp) {
 
 // CallExprAST overload
 
-llvm::Value* IRGen::visit(CallExprAST* node) {
+llvm::Value* IRGen::visit(CallExprAST<LLMVValue>* node) {
     // Look up the name in the global module table.
     auto DI = node->getDebugInfo();
     Function *CalleeF = TheModule->getFunction(node->getCalee());
@@ -602,7 +602,7 @@ llvm::Value* IRGen::visit(CallExprAST* node) {
         abort("Unknown function referenced", node->getCalee(), DI->getInfo());
         return nullptr;
     }
-    std::vector<std::unique_ptr < ExprAST>> Args = node->getArgs();
+    std::vector<std::unique_ptr < ExprAST<LLMVValue>>> Args = node->getArgs();
     // If argument mismatch error.
     if (CalleeF->arg_size() != Args.size()) {
         abort("Incorrect # arguments passed", DI->getInfo());
@@ -636,11 +636,11 @@ llvm::Value* IRGen::visit(CallExprAST* node) {
 
 // LocalVarDeclarationExprAST overload
 
-llvm::Value* IRGen::visit(LocalVarDeclarationExprAST* node) {
+llvm::Value* IRGen::visit(LocalVarDeclarationExprAST<LLMVValue>* node) {
 
     auto DI = node->getDebugInfo();
     std::string name = node->getName();
-    std::unique_ptr<ExprAST> Exp = node->getInitalizer();
+    std::unique_ptr<ExprAST<LLMVValue>> Exp = node->getInitalizer();
     VarType type = node->getType();
     Value* allocated = allocLocalVar(Builder->GetInsertBlock()->getParent(), name, type, DI.get());
 
@@ -659,7 +659,7 @@ llvm::Value* IRGen::visit(LocalVarDeclarationExprAST* node) {
 
 // ForExprAST overload
 
-void IRGen::visit(ForExprAST* forExpr) {
+void IRGen::visit(ForExprAST<LLMVValue>* forExpr) {
 
     BasicBlock* parentBB = Builder->GetInsertBlock();
     BasicBlock* BodyBB = nullptr;
@@ -668,10 +668,10 @@ void IRGen::visit(ForExprAST* forExpr) {
     BasicBlock* ContBB = nullptr;
 
     Function* function = parentBB->getParent();
-    std::unique_ptr<ExprBlockAST> Block = forExpr->getBody();
-    std::unique_ptr<ExprAST> Start = forExpr->getStart();
-    std::unique_ptr<ExprAST> Cond = forExpr->getCond();
-    std::unique_ptr<ExprAST> End = forExpr->getEnd();
+    std::unique_ptr<ExprBlockAST<LLMVValue>> Block = forExpr->getBody();
+    std::unique_ptr<ExprAST<LLMVValue>> Start = forExpr->getStart();
+    std::unique_ptr<ExprAST<LLMVValue>> Cond = forExpr->getCond();
+    std::unique_ptr<ExprAST<LLMVValue>> End = forExpr->getEnd();
 
     // scope for declared variables
     symbolTable.push_scope();
@@ -743,7 +743,7 @@ void IRGen::visit(ForExprAST* forExpr) {
 
 // WhileExprAST overload
 
-void IRGen::visit(WhileExprAST* forExpr) {
+void IRGen::visit(WhileExprAST<LLMVValue>* forExpr) {
 
     BasicBlock* parentBB = Builder->GetInsertBlock();
     BasicBlock* BodyBB = nullptr;
@@ -752,8 +752,8 @@ void IRGen::visit(WhileExprAST* forExpr) {
     BasicBlock* ContBB = nullptr;
 
     Function* function = parentBB->getParent();
-    std::unique_ptr<ExprBlockAST> Block = forExpr->getBody();
-    std::unique_ptr<ExprAST> Cond = forExpr->getCond();
+    std::unique_ptr<ExprBlockAST<LLMVValue>> Block = forExpr->getBody();
+    std::unique_ptr<ExprAST<LLMVValue>> Cond = forExpr->getCond();
 
     if (Block) {
         BodyBB = visitExpBlock(std::move(Block), "whileBody", nullptr);

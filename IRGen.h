@@ -35,20 +35,37 @@
 
 class DebugInfo;
 
+using LLMVValue = llvm::Value*;
+
+template<typename T>
 class PrimaryAST;
+template<typename T>
 class PrototypeAST;
+template<typename T>
 class FunctionAST;
+template<typename T>
 class ExprBlockAST;
+template<typename T>
 class IfExprAST;
+template<typename T>
 class VariableExprAST;
+template<typename T>
 class RealNumberExprAST;
+template<typename T>
 class IntegerNumberExprAST;
+template<typename T>
 class BinaryExprAST;
+template<typename T>
 class ReturnAST;
+template<typename T>
 class CallExprAST;
+template<typename T>
 class UnaryExprAST;
+template<typename T>
 class LocalVarDeclarationExprAST;
+template<typename T>
 class ForExprAST;
+template<typename T>
 class WhileExprAST;
 
 using namespace llvm;
@@ -57,20 +74,20 @@ using namespace llvm;
 class IRGen {
 public:
     IRGen(LLVMContext* TheContext);
-    void GenFromAST(std::unique_ptr<PrimaryAST> node);
-    void visit(PrototypeAST* node);
-    void visit(FunctionAST* node);
-    void visit(IfExprAST* ifexp);
-    void visit(ReturnAST* ifexp);
-    void visit(ForExprAST* node);
-    void visit(WhileExprAST* node);
-    llvm::Value* visit(VariableExprAST* node);
-    llvm::Value* visit(RealNumberExprAST* node);
-    llvm::Value* visit(IntegerNumberExprAST* node);
-    llvm::Value* visit(BinaryExprAST* node);
-    llvm::Value* visit(UnaryExprAST* node);
-    llvm::Value* visit(CallExprAST* node);
-    llvm::Value* visit(LocalVarDeclarationExprAST* node);
+    void GenFromAST(std::unique_ptr<PrimaryAST<LLMVValue>> node);
+    void visit(PrototypeAST<LLMVValue>* node);
+    void visit(FunctionAST<LLMVValue>* node);
+    void visit(IfExprAST<LLMVValue>* ifexp);
+    void visit(ReturnAST<LLMVValue>* ifexp);
+    void visit(ForExprAST<LLMVValue>* node);
+    void visit(WhileExprAST<LLMVValue>* node);
+    llvm::Value* visit(VariableExprAST<LLMVValue>* node);
+    llvm::Value* visit(RealNumberExprAST<LLMVValue>* node);
+    llvm::Value* visit(IntegerNumberExprAST<LLMVValue>* node);
+    llvm::Value* visit(BinaryExprAST<LLMVValue>* node);
+    llvm::Value* visit(UnaryExprAST<LLMVValue>* node);
+    llvm::Value* visit(CallExprAST<LLMVValue>* node);
+    llvm::Value* visit(LocalVarDeclarationExprAST<LLMVValue>* node);
     std::unique_ptr<Module> getModule();
     
 private:
@@ -81,9 +98,9 @@ private:
     std::unique_ptr<IRBuilder<>> Builder;
     std::unique_ptr<Module> TheModule;
     std::map<std::string, llvm::Value *> NamedValues;
-    llvm::Function* visitFunctionPrototypeImpl(PrototypeAST* node);
-    llvm::Function* visitFunctionImpl(FunctionAST* node);
-    llvm::BasicBlock* visitExpBlock(std::unique_ptr<ExprBlockAST> block, 
+    llvm::Function* visitFunctionPrototypeImpl(PrototypeAST<LLMVValue>* node);
+    llvm::Function* visitFunctionImpl(FunctionAST<LLMVValue>* node);
+    llvm::BasicBlock* visitExpBlock(std::unique_ptr<ExprBlockAST<LLMVValue>> block, 
         std::string name, Function* function);
     
     void allocSpaceForParams(Function* function, BasicBlock* BB);

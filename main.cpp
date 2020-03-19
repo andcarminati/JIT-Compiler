@@ -33,7 +33,7 @@ using namespace std;
 
 static llvm::LLVMContext TheContext;
 
-static void Driver(std::shared_ptr<Parser> parser){
+static void Driver(std::shared_ptr<Parser<llvm::Value*>> parser){
     
     auto generator = std::make_unique<IRGen>(IRGen(&TheContext));
     
@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
         exit(-1);
     }
     auto lexer = std::make_unique<Lexer>(Lexer(std::move(file), "tests/test13.txt"));
-    auto parser = std::make_shared<Parser>(Parser(std::move(lexer)));
+    auto parser = std::make_shared<Parser<llvm::Value*>>(Parser<llvm::Value*>(std::move(lexer)));
     
     Driver(parser);
     
