@@ -16,18 +16,23 @@
 #include "Executor.h"
 #include <iostream>
 
+static ExitOnError ExitOnErr;
+
+
 void Executor::execute() {
 
     InitializeNativeTarget();
     InitializeNativeTargetAsmPrinter();
     InitializeNativeTargetAsmParser();
-    TheJIT = std::make_unique<KaleidoscopeJIT>();
-    TheModule->setDataLayout(TheJIT->getTargetMachine().createDataLayout());
-    TheJIT->addModule(std::move(TheModule));
+    TheJIT = ExitOnErr(KaleidoscopeJIT::Create());
+    TheModule->setDataLayout(TheJIT->getDataLayout());
+    ExitOnErr(TheJIT->addModule(std::move(TheModule)));
 
     
     // Search the JIT for the __anon_expr symbol.
-    auto ExprSymbol = TheJIT->findSymbol("main");
+    auto ExprSymbol = ExitOnErr(TheJIT->lookup("main"));
+    
+    // necessary???
     if(!ExprSymbol){
         std::cout << "Main function not found" << std::endl;
         return;
@@ -35,8 +40,8 @@ void Executor::execute() {
 
     // Get the symbol's address and cast it to the right type (takes no
     // arguments, returns a double) so we can call it as a native function.
-    double (*FP)() = (double (*)())(intptr_t) cantFail(ExprSymbol.getAddress());
-    //fprintf(stderr, "Return of the main function %f\n", FP());
+    auto *FP = (double (*)())(intptr_t) ExprSymbol.getAddress();
+    assert(FP && "Failed to codegen function");
     FP();
     // Delete the anonymous expression module from the JIT.
     //TheJIT->removeModule(H);

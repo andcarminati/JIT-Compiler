@@ -57,12 +57,12 @@
       <compileType>
         <ccTool>
           <commandlineTool>clang++</commandlineTool>
-          <commandLine>-std=c++14</commandLine>
+          <commandLine>-I /usr/local/include</commandLine>
           <useLinkerLibraries>false</useLinkerLibraries>
         </ccTool>
         <linkerTool>
           <commandlineTool>clang++</commandlineTool>
-          <commandLine>-lstdc++ `llvm-config --ldflags --libs` -lpthread -ltinfo -rdynamic</commandLine>
+          <commandLine>-lstdc++ `llvm-config --ldflags --libs` -lpthread -ltinfo -rdynamic -ldl -lz</commandLine>
         </linkerTool>
       </compileType>
       <item path="AST.h" ex="false" tool="3" flavor2="0">

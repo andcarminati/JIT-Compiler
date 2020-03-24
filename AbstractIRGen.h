@@ -8,7 +8,7 @@
 #ifndef ABSTRACTIRGEN_H
 #define	ABSTRACTIRGEN_H
 
-#include <llvm/IR/Module.h>
+#include "llvm/IR/Module.h"
 
 template<typename T>
 class PrimaryAST;

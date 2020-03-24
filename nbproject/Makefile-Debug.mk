@@ -48,8 +48,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=-std=c++14
-CXXFLAGS=-std=c++14
+CCFLAGS=-I /usr/local/include
+CXXFLAGS=-I /usr/local/include
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -66,7 +66,7 @@ LDLIBSOPTIONS=
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/interpreter: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	clang++ -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/interpreter ${OBJECTFILES} ${LDLIBSOPTIONS} -lstdc++ `llvm-config --ldflags --libs` -lpthread -ltinfo -rdynamic
+	clang++ -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/interpreter ${OBJECTFILES} ${LDLIBSOPTIONS} -lstdc++ `llvm-config --ldflags --libs` -lpthread -ltinfo -rdynamic -ldl -lz
 
 ${OBJECTDIR}/Executor.o: Executor.cpp 
 	${MKDIR} -p ${OBJECTDIR}

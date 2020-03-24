@@ -78,7 +78,9 @@ static Type* convertType(VarType t, LLVMContext* context) {
 LLVMIRGen::LLVMIRGen(llvm::LLVMContext* TheContext) : AbstractIRGen<LLVMValue>(){
     
     this->TheContext = TheContext;
-    Builder = std::make_unique<llvm::IRBuilder<>>(llvm::IRBuilder<>(*TheContext));
+    //Builder = std::make_unique<IRBuilder<>>(IRBuilder<>(*TheContext));
+    Builder = std::unique_ptr<IRBuilder<>>(new llvm::IRBuilder<>(*TheContext));
+    
     TheModule = std::make_unique<llvm::Module>("my new lang", *TheContext);
     //TheFPM = 
 }
