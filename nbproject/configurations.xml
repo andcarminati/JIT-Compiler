@@ -1,174 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="95">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
-    <logicalFolder name="HeaderFiles"
-                   displayName="Arquivos de Cabeçalho"
-                   projectFiles="true">
-      <itemPath>AST.h</itemPath>
-      <itemPath>AbstractIRGen.h</itemPath>
-      <itemPath>DebugInfo.h</itemPath>
-      <itemPath>Executor.h</itemPath>
-      <itemPath>JIT.h</itemPath>
-      <itemPath>LLVMIRGen.h</itemPath>
-      <itemPath>LangDefs.h</itemPath>
-      <itemPath>Lexer.h</itemPath>
-      <itemPath>Optimizer.h</itemPath>
-      <itemPath>Parser.h</itemPath>
-      <itemPath>SymbolTable.h</itemPath>
-    </logicalFolder>
-    <logicalFolder name="SourceFiles"
-                   displayName="Arquivos de Código-Fonte"
-                   projectFiles="true">
-      <itemPath>Executor.cpp</itemPath>
-      <itemPath>LLVMIRGen.cpp</itemPath>
-      <itemPath>Lexer.cpp</itemPath>
-      <itemPath>Optimizer.cpp</itemPath>
-      <itemPath>Runtime.cpp</itemPath>
-      <itemPath>SymbolTable.cpp</itemPath>
-      <itemPath>main.cpp</itemPath>
-    </logicalFolder>
-    <logicalFolder name="ResourceFiles"
-                   displayName="Arquivos de Recurso"
-                   projectFiles="true">
-    </logicalFolder>
-    <logicalFolder name="TestFiles"
-                   displayName="Arquivos de Teste"
-                   projectFiles="false"
-                   kind="TEST_LOGICAL_FOLDER">
-    </logicalFolder>
+    <df root="." name="0">
+      <df name="src">
+        <in>Executor.cpp</in>
+        <in>LLVMIRGen.cpp</in>
+        <in>Lexer.cpp</in>
+        <in>Optimizer.cpp</in>
+        <in>Runtime.cpp</in>
+        <in>SymbolTable.cpp</in>
+        <in>main.cpp</in>
+      </df>
+    </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Arquivos Importantes"
                    projectFiles="false"
                    kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>CMakeLists.txt</itemPath>
       <itemPath>Makefile</itemPath>
     </logicalFolder>
-    <itemPath>LICENSE.txt</itemPath>
-    <itemPath>NOTICE.txt</itemPath>
-    <itemPath>tests</itemPath>
   </logicalFolder>
+  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
-    <conf name="Debug" type="1">
+    <conf name="Default" type="0">
       <toolsSet>
         <compilerSet>default</compilerSet>
-        <dependencyChecking>true</dependencyChecking>
+        <dependencyChecking>false</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
-      <compileType>
-        <ccTool>
-          <commandlineTool>clang++</commandlineTool>
-          <commandLine>-I /usr/local/include</commandLine>
-          <useLinkerLibraries>false</useLinkerLibraries>
-        </ccTool>
-        <linkerTool>
-          <commandlineTool>clang++</commandlineTool>
-          <commandLine>-lstdc++ `llvm-config --ldflags --libs` -lpthread -ltinfo -rdynamic -ldl -lz</commandLine>
-        </linkerTool>
-      </compileType>
-      <item path="AST.h" ex="false" tool="3" flavor2="0">
+      <codeAssistance>
+      </codeAssistance>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>cmake --build .</buildCommand>
+          <cleanCommand>rm -rf build</cleanCommand>
+          <executablePath>interpreter</executablePath>
+          <ccTool>
+            <incDir>
+              <pElem>.</pElem>
+            </incDir>
+            <preprocessorList>
+              <Elem>_DEBUG</Elem>
+              <Elem>_GNU_SOURCE</Elem>
+              <Elem>__STDC_CONSTANT_MACROS</Elem>
+              <Elem>__STDC_FORMAT_MACROS</Elem>
+              <Elem>__STDC_LIMIT_MACROS</Elem>
+            </preprocessorList>
+          </ccTool>
+        </makeTool>
+      </makefileType>
+      <item path="src/Executor.cpp" ex="false" tool="1" flavor2="4">
       </item>
-      <item path="AbstractIRGen.h" ex="false" tool="3" flavor2="0">
+      <item path="src/LLVMIRGen.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="DebugInfo.h" ex="false" tool="3" flavor2="0">
+      <item path="src/Lexer.cpp" ex="false" tool="1" flavor2="4">
       </item>
-      <item path="Executor.cpp" ex="false" tool="1" flavor2="0">
+      <item path="src/Optimizer.cpp" ex="false" tool="1" flavor2="4">
       </item>
-      <item path="Executor.h" ex="false" tool="3" flavor2="0">
+      <item path="src/Runtime.cpp" ex="false" tool="1" flavor2="4">
       </item>
-      <item path="JIT.h" ex="false" tool="3" flavor2="0">
+      <item path="src/SymbolTable.cpp" ex="false" tool="1" flavor2="4">
       </item>
-      <item path="LICENSE.txt" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="LLVMIRGen.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="LLVMIRGen.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="LangDefs.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Lexer.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="Lexer.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="NOTICE.txt" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Optimizer.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="Optimizer.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Parser.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Runtime.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="SymbolTable.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="SymbolTable.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="main.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tests" ex="false" tool="3" flavor2="0">
-      </item>
-    </conf>
-    <conf name="Release" type="1">
-      <toolsSet>
-        <compilerSet>default</compilerSet>
-        <dependencyChecking>true</dependencyChecking>
-        <rebuildPropChanged>false</rebuildPropChanged>
-      </toolsSet>
-      <compileType>
-        <cTool>
-          <developmentMode>5</developmentMode>
-        </cTool>
-        <ccTool>
-          <developmentMode>5</developmentMode>
-        </ccTool>
-        <fortranCompilerTool>
-          <developmentMode>5</developmentMode>
-        </fortranCompilerTool>
-        <asmTool>
-          <developmentMode>5</developmentMode>
-        </asmTool>
-      </compileType>
-      <item path="AST.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="AbstractIRGen.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="DebugInfo.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Executor.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="Executor.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="JIT.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="LICENSE.txt" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="LLVMIRGen.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="LLVMIRGen.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="LangDefs.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Lexer.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="Lexer.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="NOTICE.txt" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Optimizer.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="Optimizer.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Parser.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Runtime.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="SymbolTable.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="SymbolTable.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="main.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tests" ex="false" tool="3" flavor2="0">
+      <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
   </confs>

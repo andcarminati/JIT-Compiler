@@ -1,0 +1,4 @@
+/home/andreu/NetBeansProjects/Interpreter/CMakeFiles/edit_cache.dir
+/home/andreu/NetBeansProjects/Interpreter/CMakeFiles/rebuild_cache.dir
+/home/andreu/NetBeansProjects/Interpreter/CMakeFiles/intrinsics_gen.dir
+/home/andreu/NetBeansProjects/Interpreter/CMakeFiles/interpreter.dir

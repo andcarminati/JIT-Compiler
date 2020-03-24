@@ -12,6 +12,7 @@
 
 class DebugInfo {
 public:
+   
 
     DebugInfo(int line, int column, std::string file, std::string LineStr) : line(line), column(column), file(file), LineStr(LineStr) {
     }
