@@ -75,12 +75,12 @@ static Type* convertType(VarType t, LLVMContext* context) {
     return nullptr;
 }
 
-LLVMIRGen::LLVMIRGen(llvm::LLVMContext* TheContext) : AbstractIRGen<LLVMValue>(){
-    
+LLVMIRGen::LLVMIRGen(llvm::LLVMContext* TheContext) : AbstractIRGen<LLVMValue>() {
+
     this->TheContext = TheContext;
     //Builder = std::make_unique<IRBuilder<>>(IRBuilder<>(*TheContext));
     Builder = std::unique_ptr<IRBuilder<>>(new llvm::IRBuilder<>(*TheContext));
-    
+
     TheModule = std::make_unique<llvm::Module>("my new lang", *TheContext);
     //TheFPM = 
 }
@@ -151,7 +151,7 @@ Function* LLVMIRGen::visitFunctionImpl(FunctionAST<LLVMValue>* node) {
     auto DI = node->getDebugInfo();
     if (!TheFunction) {
         // generator must owns the prototype pointer  
-        std::unique_ptr<PrototypeAST<LLVMValue>> proto = node->getProto();
+        std::unique_ptr<PrototypeAST < LLVMValue>> proto = node->getProto();
         // gen code for prototype
         proto->acceptIRGenVisitor(this);
         TheFunction = TheModule->getFunction(Name);
@@ -264,7 +264,7 @@ BasicBlock* LLVMIRGen::visitExpBlock(std::unique_ptr<ExprBlockAST<LLVMValue>> bl
 
     // generate IR for all expressions
     while (!block->empty()) {
-        std::unique_ptr<ExprAST<LLVMValue>> expr = block->nextExp();
+        std::unique_ptr<ExprAST < LLVMValue>> expr = block->nextExp();
         expr->acceptIRGenVisitor(this);
     }
 
@@ -299,9 +299,9 @@ void LLVMIRGen::visit(IfExprAST<LLVMValue>* ifexp) {
     BasicBlock* elseBB = nullptr;
     BasicBlock* contBB = nullptr;
     Function* function = parentBB->getParent();
-    std::unique_ptr<ExprBlockAST<LLVMValue>> ThenBlock = ifexp->getThen();
-    std::unique_ptr<ExprBlockAST<LLVMValue>> ElseBlock = ifexp->getElse();
-    std::unique_ptr<ExprAST<LLVMValue>> Condition = ifexp->getCondition();
+    std::unique_ptr<ExprBlockAST < LLVMValue>> ThenBlock = ifexp->getThen();
+    std::unique_ptr<ExprBlockAST < LLVMValue>> ElseBlock = ifexp->getElse();
+    std::unique_ptr<ExprAST < LLVMValue>> Condition = ifexp->getCondition();
 
     // then and merge blocks
     contBB = BasicBlock::Create(*TheContext, "cont");
@@ -390,8 +390,8 @@ Value* LLVMIRGen::visit(BinaryExprAST<LLVMValue>* node) {
 
     auto DI = node->getDebugInfo();
     Operation Op = node->getOp();
-    std::unique_ptr<ExprAST<LLVMValue>> LHS = node->getLHS();
-    std::unique_ptr<ExprAST<LLVMValue>> RHS = node->getRHS();
+    std::unique_ptr<ExprAST < LLVMValue>> LHS = node->getLHS();
+    std::unique_ptr<ExprAST < LLVMValue>> RHS = node->getRHS();
 
     if (Op == Operation::ASSIGN) {
         // Assignment requires the LHS to be an identifier.
@@ -507,7 +507,7 @@ Value* LLVMIRGen::visit(BinaryExprAST<LLVMValue>* node) {
 Value* LLVMIRGen::visit(UnaryExprAST<LLVMValue>* node) {
 
     auto DI = node->getDebugInfo();
-    std::unique_ptr<ExprAST<LLVMValue>> LRHS = node->getLRHS();
+    std::unique_ptr<ExprAST < LLVMValue>> LRHS = node->getLRHS();
     Operation op = node->getOp();
     bool isPrefixed = node->isPrefix();
     Value* result;
@@ -564,7 +564,7 @@ Value* LLVMIRGen::visit(UnaryExprAST<LLVMValue>* node) {
 void LLVMIRGen::visit(ReturnAST<LLVMValue>* ifexp) {
 
     auto DI = ifexp->getDebugInfo();
-    std::unique_ptr<ExprAST<LLVMValue>> RHS = ifexp->getExpr();
+    std::unique_ptr<ExprAST < LLVMValue>> RHS = ifexp->getExpr();
     // get the parent function for type verification
     Function* function = currentRetBB->getParent();
 
@@ -605,7 +605,7 @@ llvm::Value* LLVMIRGen::visit(CallExprAST<LLVMValue>* node) {
         abort("Unknown function referenced", node->getCalee(), DI->getInfo());
         return nullptr;
     }
-    std::vector<std::unique_ptr < ExprAST<LLVMValue>>> Args = node->getArgs();
+    std::vector<std::unique_ptr < ExprAST < LLVMValue>>> Args = node->getArgs();
     // If argument mismatch error.
     if (CalleeF->arg_size() != Args.size()) {
         abort("Incorrect # arguments passed", DI->getInfo());
@@ -643,7 +643,7 @@ llvm::Value* LLVMIRGen::visit(LocalVarDeclarationExprAST<LLVMValue>* node) {
 
     auto DI = node->getDebugInfo();
     std::string name = node->getName();
-    std::unique_ptr<ExprAST<LLVMValue>> Exp = node->getInitalizer();
+    std::unique_ptr<ExprAST < LLVMValue>> Exp = node->getInitalizer();
     VarType type = node->getType();
     Value* allocated = allocLocalVar(Builder->GetInsertBlock()->getParent(), name, type, DI.get());
 
@@ -671,10 +671,10 @@ void LLVMIRGen::visit(ForExprAST<LLVMValue>* forExpr) {
     BasicBlock* ContBB = nullptr;
 
     Function* function = parentBB->getParent();
-    std::unique_ptr<ExprBlockAST<LLVMValue>> Block = forExpr->getBody();
-    std::unique_ptr<ExprAST<LLVMValue>> Start = forExpr->getStart();
-    std::unique_ptr<ExprAST<LLVMValue>> Cond = forExpr->getCond();
-    std::unique_ptr<ExprAST<LLVMValue>> End = forExpr->getEnd();
+    std::unique_ptr<ExprBlockAST < LLVMValue>> Block = forExpr->getBody();
+    std::unique_ptr<ExprAST < LLVMValue>> Start = forExpr->getStart();
+    std::unique_ptr<ExprAST < LLVMValue>> Cond = forExpr->getCond();
+    std::unique_ptr<ExprAST < LLVMValue>> End = forExpr->getEnd();
 
     // scope for declared variables
     symbolTable.push_scope();
@@ -688,12 +688,19 @@ void LLVMIRGen::visit(ForExprAST<LLVMValue>* forExpr) {
         // we need to continue from tha last block.
         LastBodyBB = &function->getBasicBlockList().back();
         // put end statement at the end of the body
-        Instruction& currInst = LastBodyBB->back();
-        // dont't put a branch after a return statement
-        // put end statement at the end of the body
+
         Builder->SetInsertPoint(LastBodyBB);
-        if (End && !currInst.isTerminator()) {
+        // put end statement at the end of the body
+        //check if the last block is empty, if yes we can gen End
+        if (End && LastBodyBB->size() == 0) {
             Value* EndValue = End->acceptIRGenVisitor(this);
+        } else {
+            // this basic block is not empty, we can check the last instruction
+            // dont't put a branch after a return statement
+            Instruction& currInst = LastBodyBB->back();
+            if (End && !currInst.isTerminator()) {
+                Value* EndValue = End->acceptIRGenVisitor(this);
+            }
         }
     } else {
         // empty BB
@@ -755,8 +762,8 @@ void LLVMIRGen::visit(WhileExprAST<LLVMValue>* forExpr) {
     BasicBlock* ContBB = nullptr;
 
     Function* function = parentBB->getParent();
-    std::unique_ptr<ExprBlockAST<LLVMValue>> Block = forExpr->getBody();
-    std::unique_ptr<ExprAST<LLVMValue>> Cond = forExpr->getCond();
+    std::unique_ptr<ExprBlockAST < LLVMValue>> Block = forExpr->getBody();
+    std::unique_ptr<ExprAST < LLVMValue>> Cond = forExpr->getCond();
 
     if (Block) {
         BodyBB = visitExpBlock(std::move(Block), "whileBody", nullptr);
