@@ -6,6 +6,8 @@
         <in>Executor.cpp</in>
         <in>LLVMIRGen.cpp</in>
         <in>Lexer.cpp</in>
+        <in>MLIRGen.cpp</in>
+        <in>MLIRGen.h</in>
         <in>Optimizer.cpp</in>
         <in>Runtime.cpp</in>
         <in>SymbolTable.cpp</in>
@@ -59,6 +61,10 @@
       <item path="src/LLVMIRGen.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/Lexer.cpp" ex="false" tool="1" flavor2="4">
+      </item>
+      <item path="src/MLIRGen.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLIRGen.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/Optimizer.cpp" ex="false" tool="1" flavor2="4">
       </item>

@@ -68,9 +68,7 @@ enum Token {
 
 class Lexer {
 public:
-    Lexer(std::unique_ptr<std::ifstream>, std::string);
-    //Lexer(const Lexer& orig) { std::cout << "teste1";};
-    //virtual ~Lexer(){}
+    Lexer(const char* begin, const char* end , std::string filename);
 
     int getCurrentToken();
     int getNextToken();
@@ -92,7 +90,7 @@ private:
     int col = 1;
     int tokCol = 1;
     std::map<Operation, int> BinopPrecedence;
-    std::unique_ptr<std::ifstream> file;
+    //std::unique_ptr<std::ifstream> file;
     std::string IdentifierStr; // Filled in if tok_identifier
     std::string LineStr;
     double NumValReal; // Filled in if tok_real
@@ -100,6 +98,8 @@ private:
     Operation CurrOperation;
     OperationType CurrOpType;
     std::string FileName;
+    const char *current;
+    const char *end;
     int getTok();
     int NextChar();
 

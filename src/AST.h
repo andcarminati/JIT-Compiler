@@ -89,6 +89,10 @@ public:
     virtual bool isUncondTransfer() {
         return false;
     }
+    
+    virtual bool isReturn(){
+        return false;
+    }
 };
 
 
@@ -289,6 +293,10 @@ public:
     virtual bool isUncondTransfer() {
         return true;
     }
+    
+    virtual bool isReturn() {
+        return true;
+    }
 
     std::unique_ptr<ExprAST<T>> getExpr() {
         return std::move(RHS);
@@ -404,11 +412,16 @@ public:
     }
 
     bool hasReturn() {
-        ReturnAST<T> *ret = dynamic_cast<ReturnAST<T> *> (Expressions.back().get());
-        if (!ret) {
-            return false;
+        //ReturnAST<T> *ret = static_cast<ReturnAST<T> *> (Expressions.back().get());
+        //if (!ret) {
+        //    return false;
+        //}
+        //return true;
+        ExprAST<T> *ret = Expressions.back().get();
+        if(ret->isReturn()){
+            return true;
         }
-        return true;
+        return false;
     }
 };
 

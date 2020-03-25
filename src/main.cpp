@@ -15,6 +15,8 @@
 
 
 #include <llvm/IR/LLVMContext.h>
+#include <llvm/Support/CommandLine.h>
+#include <llvm/Support/ErrorOr.h>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -28,60 +30,104 @@
 #include "Optimizer.h"
 #include "Executor.h"
 
-//using namespace llvm;
+namespace cl = llvm::cl;
 using namespace std;
 
-static llvm::LLVMContext TheContext;
 
-static void Driver(std::shared_ptr<Parser<llvm::Value*>> parser){
-    
+static cl::opt<std::string> inputFilename(cl::Positional,
+        cl::desc("<input source file>"),
+        cl::init("-"),
+        cl::value_desc("filename"));
+
+namespace {
+
+    enum IrType {
+        LLVMIR, MLIR
+    };
+}
+static cl::opt<enum IrType> irType(
+        "ir", cl::init(LLVMIR), cl::desc("Decided the kind of output desired"),
+        cl::values(clEnumValN(LLVMIR, "llvmir", "process input using LLVM IR gen.")),
+        cl::values(clEnumValN(MLIR, "mlir", "process input using MLIR IR gen.")));
+
+namespace {
+
+    enum Action {
+        None, DumpAST, DumpIR
+    };
+}
+static cl::opt<enum Action> emitAction(
+        "emit", cl::desc("Select the kind of output desired"),
+        cl::values(clEnumValN(DumpAST, "ast", "output the AST dump")),
+        cl::values(clEnumValN(DumpIR, "dumpir", "output the LLVM IR dump")));
+
+/// Returns a Toy AST resulting from parsing the file or a nullptr on error.
+
+template<typename T>
+std::unique_ptr<Parser<T>> parseInputFile(llvm::StringRef filename) {
+    llvm::ErrorOr<std::unique_ptr < llvm::MemoryBuffer>> fileOrErr =
+            llvm::MemoryBuffer::getFileOrSTDIN(filename);
+    if (std::error_code ec = fileOrErr.getError()) {
+        llvm::errs() << "Could not open input file: " << ec.message() << "\n";
+        return nullptr;
+    }
+    auto buffer = fileOrErr.get()->getBuffer();
+    // LexerBuffer lexer(buffer.begin(), buffer.end(), );
+    auto lexer = std::make_unique<Lexer>(buffer.begin(), buffer.end(), std::string(filename));
+    auto parser = std::make_unique<Parser < T >> (std::move(lexer));
+    return std::move(parser);
+    //exit(0);
+}
+
+int dumpMLIR() {
+
+    return 0;
+}
+
+int dumpAST() {
+    return 0;
+}
+
+static llvm::LLVMContext TheContext;
+int LLVMIRDriver() {
+
+    auto parser = parseInputFile<llvm::Value*>(inputFilename);
+
     auto generator = std::make_unique<LLVMIRGen>(LLVMIRGen(&TheContext));
-    
-    while(true){
+
+    while (true) {
         auto exp = parser->nextConstruct();
-        if(parser->hasFail()){
-            std::cout << "Aborting compilation" << std::endl;
-            return;
+        if (parser->hasFail()) {
+            llvm::errs() << "Aborting compilation\n";
+            return -1;
         }
-        if(!exp){
+        if (!exp) {
             break;
         }
         generator->GenFromAST(std::move(exp));
     }
-    
+
     auto optimizer = std::make_unique<Optimizer>(Optimizer(&TheContext, generator->getModule()));
     optimizer->optimizeCode();
-    
+
     auto executor = std::make_unique<Executor>(Executor(&TheContext, optimizer->getModule()));
     executor->execute();
-}
 
-/*
- * 
- */
-// avoid reexecution of main.
-static bool again = false;
-
-int main(int argc, char** argv) {
-
-    if(again){
-        return -1;
-    } else{
-        again = true;
-    } 
-    
-    //auto file = std::make_unique<std::ifstream>(std::ifstream("tests/testif.txt"));
-    auto file = std::make_unique<std::ifstream>(std::ifstream("tests/test13.txt"));
-    
-    if(!file->good()){
-        std::cout << "Cannot open the specified file!" << std::endl;
-        exit(-1);
-    }
-    auto lexer = std::make_unique<Lexer>(Lexer(std::move(file), "tests/test13.txt"));
-    auto parser = std::make_shared<Parser<llvm::Value*>>(Parser<llvm::Value*>(std::move(lexer)));
-    
-    Driver(parser);
-    
     return 0;
 }
 
+int main(int argc, char **argv) {
+    cl::ParseCommandLineOptions(argc, argv, "jit compiler\n");
+
+    switch (irType) {
+        case IrType::LLVMIR:
+            return LLVMIRDriver();
+        case IrType::MLIR:
+            //return dumpMLIR();
+            break;
+        default:
+            llvm::errs() << "No action specified (parsing only?), use -emit=<action>\n";
+    }
+
+    return 0;
+}

@@ -22,9 +22,10 @@
 #include <cstdlib>
 #include <iostream>
 
-Lexer::Lexer(std::unique_ptr<std::ifstream> file, std::string FileName) {
-    this->file = std::move(file);
-    this->FileName = FileName;
+Lexer::Lexer(const char* begin, const char* end, std::string FileName) {
+    current = begin;
+    this->end = end;
+    FileName = std::move(FileName);
     // Install standard binary operators.
     // 1 is lowest precedence.
     BinopPrecedence[Operation::ASSIGN] = 2;
@@ -46,9 +47,14 @@ int Lexer::getNextToken() {
     return CurTok;
 }
 
-int Lexer::NextChar(){
-    LastChar = file->get();
-    LineStr += LastChar;
+int Lexer::NextChar() {
+    if (current == end) {
+        LastChar = EOF;
+    } else {
+        LastChar = *current;
+        current++;
+        LineStr += LastChar;
+    }
     return LastChar;
 }
 
@@ -103,7 +109,7 @@ int Lexer::getTok() {// gettok - Return the next token from standard input.
         if (IdentifierStr == "let") {
             return tok_let;
         }
-        if(IdentifierStr == "for") {
+        if (IdentifierStr == "for") {
             return tok_for;
         }
         return tok_identifier;
@@ -243,7 +249,7 @@ int Lexer::GetTokLine() {
     return line;
 }
 
-int Lexer::GetTokCol(){
+int Lexer::GetTokCol() {
     return tokCol;
 }
 
@@ -251,6 +257,6 @@ std::string& Lexer::getFileName() {
     return FileName;
 }
 
-std::string Lexer::getLineStr(){
+std::string Lexer::getLineStr() {
     return LineStr;
 }
