@@ -8,10 +8,10 @@
         <in>Lexer.cpp</in>
         <in>MLIRGen.cpp</in>
         <in>MLIRGen.h</in>
+        <in>Main.cpp</in>
         <in>Optimizer.cpp</in>
         <in>Runtime.cpp</in>
         <in>SymbolTable.cpp</in>
-        <in>main.cpp</in>
       </df>
     </df>
     <logicalFolder name="ExternalFiles"
@@ -66,13 +66,13 @@
       </item>
       <item path="src/MLIRGen.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src/Main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="src/Optimizer.cpp" ex="false" tool="1" flavor2="4">
       </item>
       <item path="src/Runtime.cpp" ex="false" tool="1" flavor2="4">
       </item>
       <item path="src/SymbolTable.cpp" ex="false" tool="1" flavor2="4">
-      </item>
-      <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
   </confs>

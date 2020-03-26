@@ -61,7 +61,6 @@ static cl::opt<enum Action> emitAction(
         cl::values(clEnumValN(DumpAST, "ast", "output the AST dump")),
         cl::values(clEnumValN(DumpIR, "dumpir", "output the LLVM IR dump")));
 
-/// Returns a Toy AST resulting from parsing the file or a nullptr on error.
 
 template<typename T>
 std::unique_ptr<Parser<T>> parseInputFile(llvm::StringRef filename) {
@@ -72,11 +71,19 @@ std::unique_ptr<Parser<T>> parseInputFile(llvm::StringRef filename) {
         return nullptr;
     }
     auto buffer = fileOrErr.get()->getBuffer();
-    // LexerBuffer lexer(buffer.begin(), buffer.end(), );
     auto lexer = std::make_unique<Lexer>(buffer.begin(), buffer.end(), std::string(filename));
     auto parser = std::make_unique<Parser < T >> (std::move(lexer));
     return std::move(parser);
-    //exit(0);
+}
+
+template<typename T>
+std::unique_ptr<AbstractIRGen<T>> createIRGen();
+
+static llvm::LLVMContext TheContext;
+
+template<>
+std::unique_ptr<AbstractIRGen<llvm::Value*>> createIRGen<llvm::Value*>(){
+    return std::make_unique<LLVMIRGen>(&TheContext);
 }
 
 int dumpMLIR() {
@@ -88,13 +95,13 @@ int dumpAST() {
     return 0;
 }
 
-static llvm::LLVMContext TheContext;
-int LLVMIRDriver() {
+
+template<typename T>
+int GenDriver() {
 
     auto parser = parseInputFile<llvm::Value*>(inputFilename);
-
-    auto generator = std::make_unique<LLVMIRGen>(LLVMIRGen(&TheContext));
-
+    auto generator = createIRGen<llvm::Value*>();
+    
     while (true) {
         auto exp = parser->nextConstruct();
         if (parser->hasFail()) {
@@ -121,7 +128,7 @@ int main(int argc, char **argv) {
 
     switch (irType) {
         case IrType::LLVMIR:
-            return LLVMIRDriver();
+            return GenDriver<llvm::Value*>();
         case IrType::MLIR:
             //return dumpMLIR();
             break;

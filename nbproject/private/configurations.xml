@@ -36,13 +36,13 @@
         <in>Lexer.h</in>
         <in>MLIRGen.cpp</in>
         <in>MLIRGen.h</in>
+        <in>Main.cpp</in>
         <in>Optimizer.cpp</in>
         <in>Optimizer.h</in>
         <in>Parser.h</in>
         <in>Runtime.cpp</in>
         <in>SymbolTable.cpp</in>
         <in>SymbolTable.h</in>
-        <in>main.cpp</in>
       </df>
       <df name="tests">
         <in>test2.s</in>
