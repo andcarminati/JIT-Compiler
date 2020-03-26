@@ -277,7 +277,7 @@ BasicBlock* LLVMIRGen::visitExpBlock(std::unique_ptr<ExprBlockAST<LLVMValue>> bl
         if (function->getReturnType() == Type::getVoidTy(*TheContext)) {
             Builder->CreateRetVoid();
         } else {
-            Symbol* retSymb = symbolTable.getSymbol("retvalue");
+            Symbol<LLVMValue>* retSymb = symbolTable.getSymbol("retvalue");
             Value* retV = retSymb->getMemRef();
             Value* loadRet = Builder->CreateLoad(retV);
 
@@ -360,7 +360,7 @@ llvm::Value* LLVMIRGen::visit(VariableExprAST<LLVMValue>* node) {
         return nullptr;
     }
 
-    Symbol* symbol = symbolTable.getSymbol(node->getName());
+    Symbol<LLVMValue>* symbol = symbolTable.getSymbol(node->getName());
 
     // at current stage, we can deal only with local variables.
     if (symbol->getStorageType() == StorageType::LOCAL) {
@@ -410,7 +410,7 @@ Value* LLVMIRGen::visit(BinaryExprAST<LLVMValue>* node) {
             return nullptr;
 
         // Look up the name.
-        Symbol* symb = symbolTable.getSymbol(LHSE->getName());
+        Symbol<LLVMValue>* symb = symbolTable.getSymbol(LHSE->getName());
 
         if (!symb) {
             abort("Unknown variable name", LHSE->getName(), DI->getInfo());
@@ -520,7 +520,7 @@ Value* LLVMIRGen::visit(UnaryExprAST<LLVMValue>* node) {
     }
 
     Value* var = LHSE->acceptIRGenVisitor(this);
-    Symbol* sym = symbolTable.getSymbol(LHSE->getName());
+    Symbol<LLVMValue>* sym = symbolTable.getSymbol(LHSE->getName());
     if (!sym) {
         abort("Unknown symbol: ", LHSE->getName());
         return nullptr;
@@ -586,7 +586,7 @@ void LLVMIRGen::visit(ReturnAST<LLVMValue>* ifexp) {
             abort("Type incompatibility between returned expression and function's return type", DI->getInfo());
         }
 
-        Symbol* retSymb = symbolTable.getSymbol("retvalue");
+        Symbol<LLVMValue>* retSymb = symbolTable.getSymbol("retvalue");
         Builder->CreateStore(Expr, retSymb->getMemRef());
     }
 

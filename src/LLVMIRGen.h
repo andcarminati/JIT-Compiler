@@ -29,7 +29,7 @@
 #include <llvm/IR/LegacyPassManager.h>
 #include <map>
 #include "AST.h"
-#include "SymbolTable.h"
+#include "ListSymbolTable.h"
 #include "LangDefs.h"
 #include "AbstractIRGen.h"
 
@@ -60,7 +60,7 @@ public:
     virtual std::unique_ptr<Module> getModule() override;
     
 private:
-    SymbolTable symbolTable;
+    ListSymbolTable<LLVMValue> symbolTable;
     LLVMContext* TheContext;
     llvm::BasicBlock* currentRetBB = nullptr;
     std::unique_ptr<legacy::FunctionPassManager> TheFPM;

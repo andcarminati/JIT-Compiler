@@ -26,7 +26,7 @@
 
 #include "llvm/IR/Module.h"
 #include "AST.h"
-#include "SymbolTable.h"
+#include "ListSymbolTable.h"
 #include "LangDefs.h"
 #include "AbstractIRGen.h"
 
@@ -35,9 +35,11 @@ using namespace mlir;
 using MLIRValue = mlir::Value;
 
 // consumes the AST generating MLIR IR
-class MLIRGen  : public AbstractIRGen<MLIRValue>{
+
+class MLIRGen : public AbstractIRGen<MLIRValue> {
 public:
-virtual void GenFromAST(std::unique_ptr<PrimaryAST<MLIRValue>> node) override;
+    MLIRGen(mlir::MLIRContext* context);
+    virtual void GenFromAST(std::unique_ptr<PrimaryAST<MLIRValue>> node) override;
     virtual void visit(PrototypeAST<MLIRValue>* node) override;
     virtual void visit(FunctionAST<MLIRValue>* node) override;
     virtual void visit(IfExprAST<MLIRValue>* ifexp) override;
@@ -53,9 +55,9 @@ virtual void GenFromAST(std::unique_ptr<PrimaryAST<MLIRValue>> node) override;
     virtual MLIRValue visit(LocalVarDeclarationExprAST<MLIRValue>* node) override;
     virtual std::unique_ptr<llvm::Module> getModule() override;
 private:
-  mlir::ModuleOp theModule;
-
-  mlir::OpBuilder builder;
+    mlir::ModuleOp theModule;
+    mlir::OpBuilder builder;
+    ListSymbolTable<MLIRValue> symbolTable;
 };
 
 #endif	/* MLIRGEN_H */

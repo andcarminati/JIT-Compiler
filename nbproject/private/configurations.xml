@@ -34,6 +34,7 @@
         <in>LangDefs.h</in>
         <in>Lexer.cpp</in>
         <in>Lexer.h</in>
+        <in>ListSymbolTable.h</in>
         <in>MLIRGen.cpp</in>
         <in>MLIRGen.h</in>
         <in>Main.cpp</in>
@@ -41,8 +42,6 @@
         <in>Optimizer.h</in>
         <in>Parser.h</in>
         <in>Runtime.cpp</in>
-        <in>SymbolTable.cpp</in>
-        <in>SymbolTable.h</in>
       </df>
       <df name="tests">
         <in>test2.s</in>
