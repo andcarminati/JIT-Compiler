@@ -17,6 +17,7 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/Support/CommandLine.h>
 #include <llvm/Support/ErrorOr.h>
+#include <llvm/Support/ErrorHandling.h>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -27,6 +28,7 @@
 #include "Lexer.h"
 #include "AST.h"
 #include "LLVMIRGen.h"
+#include "MLIRGen.h"
 #include "Optimizer.h"
 #include "Executor.h"
 
@@ -61,7 +63,6 @@ static cl::opt<enum Action> emitAction(
         cl::values(clEnumValN(DumpAST, "ast", "output the AST dump")),
         cl::values(clEnumValN(DumpIR, "dumpir", "output the LLVM IR dump")));
 
-
 template<typename T>
 std::unique_ptr<Parser<T>> parseInputFile(llvm::StringRef filename) {
     llvm::ErrorOr<std::unique_ptr < llvm::MemoryBuffer>> fileOrErr =
@@ -79,11 +80,37 @@ std::unique_ptr<Parser<T>> parseInputFile(llvm::StringRef filename) {
 template<typename T>
 std::unique_ptr<AbstractIRGen<T>> createIRGen();
 
+template<typename T>
+int optimizeAndRun(std::unique_ptr<T>);
+
 static llvm::LLVMContext TheContext;
 
 template<>
-std::unique_ptr<AbstractIRGen<llvm::Value*>> createIRGen<llvm::Value*>(){
+std::unique_ptr<AbstractIRGen<llvm::Value*>> createIRGen<llvm::Value*>() {
     return std::make_unique<LLVMIRGen>(&TheContext);
+}
+
+template<>
+int optimizeAndRun(std::unique_ptr<AbstractIRGen<llvm::Value*>> generator) {
+    auto optimizer = std::make_unique<Optimizer>(Optimizer(&TheContext, generator->getModule()));
+    optimizer->optimizeCode();
+
+    auto executor = std::make_unique<Executor>(Executor(&TheContext, optimizer->getModule()));
+    executor->execute();
+    
+    return 0;
+}
+
+mlir::MLIRContext TheMLIRContext;
+
+template<>
+std::unique_ptr<AbstractIRGen<mlir::Value>> createIRGen<mlir::Value>() {
+    return std::make_unique<MLIRGen>(&TheMLIRContext);
+}
+template<>
+int optimizeAndRun(std::unique_ptr<AbstractIRGen<mlir::Value>> generator) {
+    llvm_unreachable("Uimplemented optimizeAndRun for MLIR");
+    return 0;
 }
 
 int dumpMLIR() {
@@ -95,13 +122,12 @@ int dumpAST() {
     return 0;
 }
 
-
 template<typename T>
 int GenDriver() {
 
-    auto parser = parseInputFile<llvm::Value*>(inputFilename);
-    auto generator = createIRGen<llvm::Value*>();
-    
+    auto parser = parseInputFile<T>(inputFilename);
+    auto generator = createIRGen<T>();
+
     while (true) {
         auto exp = parser->nextConstruct();
         if (parser->hasFail()) {
@@ -113,14 +139,8 @@ int GenDriver() {
         }
         generator->GenFromAST(std::move(exp));
     }
-
-    auto optimizer = std::make_unique<Optimizer>(Optimizer(&TheContext, generator->getModule()));
-    optimizer->optimizeCode();
-
-    auto executor = std::make_unique<Executor>(Executor(&TheContext, optimizer->getModule()));
-    executor->execute();
-
-    return 0;
+    
+    return optimizeAndRun(std::move(generator));
 }
 
 int main(int argc, char **argv) {
@@ -130,7 +150,7 @@ int main(int argc, char **argv) {
         case IrType::LLVMIR:
             return GenDriver<llvm::Value*>();
         case IrType::MLIR:
-            //return dumpMLIR();
+            return GenDriver<mlir::Value>();
             break;
         default:
             llvm::errs() << "No action specified (parsing only?), use -emit=<action>\n";

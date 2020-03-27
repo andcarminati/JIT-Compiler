@@ -12,6 +12,7 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
+#include <llvm/Support/ErrorHandling.h>
 #include "mlir/IR/Module.h"
 #include "MLIRGen.h"
 
@@ -20,61 +21,69 @@ MLIRGen::MLIRGen(mlir::MLIRContext* context) : builder(context) {
 }
 
 void MLIRGen::GenFromAST(std::unique_ptr<PrimaryAST<MLIRValue>> node) {
-
+    llvm_unreachable("Unimplemented MLIRGen member function");
 }
 
 void MLIRGen::visit(PrototypeAST<MLIRValue>* node) {
-    
+    llvm_unreachable("Unimplemented MLIRGen member function");
 }
 
 void MLIRGen::visit(FunctionAST<MLIRValue>* node) {
-    
+    llvm_unreachable("Unimplemented MLIRGen member function");
 }
 
 void MLIRGen::visit(IfExprAST<MLIRValue>* ifexp){
-    
+    llvm_unreachable("Unimplemented MLIRGen member function");
 }
 
 void MLIRGen::visit(ReturnAST<MLIRValue>* ifexp){
-    
+    llvm_unreachable("Unimplemented MLIRGen member function");
 }
 
 void MLIRGen::visit(ForExprAST<MLIRValue>* node){
-    
+    llvm_unreachable("Unimplemented MLIRGen member function");
 }
 
 void MLIRGen::visit(WhileExprAST<MLIRValue>* node){
-    
+    llvm_unreachable("Unimplemented MLIRGen member function");
 }
 
 MLIRValue MLIRGen::visit(VariableExprAST<MLIRValue>* node){
+    llvm_unreachable("Unimplemented MLIRGen member function");
     return nullptr;
 }
 
 MLIRValue MLIRGen::visit(RealNumberExprAST<MLIRValue>* node){
+    llvm_unreachable("Unimplemented MLIRGen member function");
     return nullptr;
 }
 
 MLIRValue MLIRGen::visit(IntegerNumberExprAST<MLIRValue>* node){
+    llvm_unreachable("Unimplemented MLIRGen member function");
     return nullptr;
 }
 
 MLIRValue MLIRGen::visit(BinaryExprAST<MLIRValue>* node){
+    llvm_unreachable("Unimplemented MLIRGen member function");
     return nullptr;
 }
 
 MLIRValue MLIRGen::visit(UnaryExprAST<MLIRValue>* node){
+    llvm_unreachable("Unimplemented MLIRGen member function");
     return nullptr;
 }
 
 MLIRValue MLIRGen::visit(CallExprAST<MLIRValue>* node){
+    llvm_unreachable("Unimplemented MLIRGen member function");
     return nullptr;
 }
 
 MLIRValue MLIRGen::visit(LocalVarDeclarationExprAST<MLIRValue>* node){
+    llvm_unreachable("Unimplemented MLIRGen member function");
     return nullptr;
 }
     
 std::unique_ptr<llvm::Module> MLIRGen::getModule(){
+    llvm_unreachable("Unimplemented MLIRGen member function");
     return nullptr;
 }
