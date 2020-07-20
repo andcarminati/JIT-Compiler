@@ -38,7 +38,7 @@ using namespace std;
 
 static cl::opt<std::string> inputFilename(cl::Positional,
         cl::desc("<input source file>"),
-        cl::init("-"),
+        cl::init("nofile"),
         cl::value_desc("filename"));
 
 namespace {
@@ -124,8 +124,18 @@ int dumpAST() {
 
 template<typename T>
 int GenDriver() {
+    
+    if(inputFilename == "nofile"){
+        llvm::errs() << "Interpreter error: no input file\n";
+        return -1;
+    }
 
     auto parser = parseInputFile<T>(inputFilename);
+    
+    if(parser == nullptr){
+        return 1;
+    }
+    
     auto generator = createIRGen<T>();
 
     while (true) {
